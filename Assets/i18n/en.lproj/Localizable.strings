@@ -1,0 +1,92 @@
+// Common
+"Common.OK" = "OK";
+"Common.Cancel" = "Cancel";
+"Common.Edit" = "Edit";
+"Common.edit" = "edit";
+"Common.Done" = "Done";
+"Common.Next" = "Next";
+"Common.Delete" = "Delete";
+"Common.Create" = "Create";
+"Common.Back" = "Back";
+"Common.Close" = "Close";
+"Common.Yes" = "Yes";
+"Common.No" = "No";
+"Common.TakePhotoOrVideo" = "Take Photo or Video";
+"Common.TakePhoto" = "Take Photo";
+"Common.ChoosePhoto" = "Choose Photo";
+"Common.of" = "of";
+"Common.Search" = "Search";
+"Common.More" = "More";
+"Common.Select" = "Select";
+"Items.NOfM" = "%1$@ of %2$@";
+
+"Common.Reload" = "Reload Page";
+"Common.Share" = "Share";
+"Common.Feedback" = "Feedback &\nReport";
+"Common.Privacy" = "Privacy\nAgreement";
+"Common.Terms" = "User\nAgreement";
+"Common.Settings" = "Settings";
+"Common.Shortcut" = "Add to Home Screen";
+
+
+// WebApp
+"WebApp.AllowWriteTitle" = "Allow Sending Messages?";
+"WebApp.AllowWriteConfirmation" = "This will allow the bot %@ to message you on %@.";
+
+"WebApp.SharePhoneTitle" = "Share Phone Number?";
+"WebApp.SharePhoneConfirmation" = "%@ will know your phone number. This can be useful for integration with other services.";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ will know your phone number. This can be useful for integration with other services.\n\nThis will also unblock the bot.";
+
+"WebApp.DisclaimerTitle" = "Terms of Use";
+"WebApp.DisclaimerText" = "You are about to use a mini app operated by an independent party not affiliated with %@. You must agree to the Terms of Use of mini apps to continue.";
+"WebApp.DisclaimerAgree" = "I agree to the [Terms of Use]()";
+"WebApp.DisclaimerContinue" = "Continue";
+
+"WebApp.ShortcutsAdded" = "%@ shortcut added in attachment menu.";
+"WebApp.ShortcutsSettingsAdded" = "%@ shortcut added in attachment menu and Settings.";
+
+"WebApp.AllowWriteTitle" = "Allow Sending Messages?";
+"WebApp.AllowWriteConfirmation" = "This will allow the bot %@ to message you on %@.";
+
+"WebApp.RemoveAllConfirmationText" = "This will remove %@ shortcuts from all menus.";
+
+"WebApp.TermsOfUse" = "Terms of Use";
+
+"WebApp.AlertBiometryAccessText" = "Do you want to allow %@ to use Face ID?";
+"WebApp.AlertBiometryAccessTouchIDText" = "Do you want to allow %@ to use Touch ID?";
+
+"WebApp.OpenBot" = "Open Bot";
+"WebApp.ReloadPage" = "Reload Page";
+"WebApp.RemoveBot" = "Remove Bot";
+
+"WebApp.AddToAttachmentText" = "%@ requests your permission to be added as an option to your attachments menu, so you can access it from any chat.";
+"WebApp.AddToAttachmentAdd" = "Add";
+
+"WebApp.AddToAttachmentUnavailableError" = "This bot can't be added to the attachment menu.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "This bot is already added to your attachment menu.";
+"WebApp.AddToAttachmentSucceeded" = "%@ has been added to your attachment menu.";
+
+"WebApp.OpenWebViewAlertTitle" = "Open Web App";
+"WebApp.OpenWebViewAlertText" = "%@ would like to open its web app to proceed.\n\nIt will be able to access your IP address and basic device info.";
+
+"WebApp.MessagePreview" = "Message Preview";
+"WebApp.Send" = "Send";
+
+"WebApp.RemoveConfirmationTitle" = "Remove Bot";
+"WebApp.RemoveConfirmationText" = "Remove %@ from the attachment menu?";
+
+"WebApp.Settings" = "Settings";
+
+"WebApp.SelectChat" = "Select Chat";
+
+"WebApp.CloseConfirmation" = "Changes that you made may not be saved.";
+"WebApp.CloseAnyway" = "Close Anyway";
+
+"WebApp.ShareMyPhoneNumber" = "Share My Phone Number";
+"WebApp.ShareMyPhoneNumberConfirmation" = "Are you sure you want to share your phone number %1$@ with %2$@?";
+
+"WebApp.AddToAttachmentAllowMessages" = "Allow %@ to send me messages";
+
+"WebApp.LaunchMoreInfo" = "More about this bot";
+"WebApp.LaunchConfirmation" = "To launch this web app, you will connect to its website.";
+"WebApp.LaunchOpenApp" = "Open App";

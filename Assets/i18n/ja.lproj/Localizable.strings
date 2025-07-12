@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "OK";
+"Common.Cancel" = "キャンセル";
+"Common.Edit" = "編集";
+"Common.edit" = "編集";
+"Common.Done" = "完了";
+"Common.Next" = "次へ";
+"Common.Delete" = "削除";
+"Common.Create" = "作成";
+"Common.Back" = "戻る";
+"Common.Close" = "閉じる";
+"Common.Yes" = "はい";
+"Common.No" = "いいえ";
+"Common.TakePhotoOrVideo" = "写真または動画を撮影";
+"Common.TakePhoto" = "写真を撮影";
+"Common.ChoosePhoto" = "写真を選択";
+"Common.of" = "の";
+"Common.Search" = "検索";
+"Common.More" = "その他";
+"Common.Select" = "選択";
+"Items.NOfM" = "%1$@ / %2$@";
+
+"Common.Reload" = "ページを再読み込み";
+"Common.Share" = "共有";
+"Common.Feedback" = "フィードバック &\n報告";
+"Common.Privacy" = "プライバシー\n契約";
+"Common.Terms" = "利用\n契約";
+"Common.Settings" = "設定";
+"Common.Shortcut" = "ホーム画面に追加";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "メッセージの送信を許可しますか？";
+"WebApp.AllowWriteConfirmation" = "これにより、ボット %@ が %@ でメッセージを送信できるようになります。";
+
+"WebApp.SharePhoneTitle" = "電話番号を共有しますか？";
+"WebApp.SharePhoneConfirmation" = "%@ があなたの電話番号を知ることになります。これは他のサービスとの統合に役立ちます。";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ があなたの電話番号を知ることになります。これは他のサービスとの統合に役立ちます。\n\nこれにより、ボットのブロックも解除されます。";
+
+"WebApp.DisclaimerTitle" = "利用規約";
+"WebApp.DisclaimerText" = "あなたは %@ と提携していない独立した第三者が運営するミニアプリを使用しようとしています。続行するには、ミニアプリの利用規約に同意する必要があります。";
+"WebApp.DisclaimerAgree" = "[利用規約]()に同意します";
+"WebApp.DisclaimerContinue" = "続行";
+
+"WebApp.ShortcutsAdded" = "%@ ショートカットが添付メニューに追加されました。";
+"WebApp.ShortcutsSettingsAdded" = "%@ ショートカットが添付メニューと設定に追加されました。";
+
+"WebApp.RemoveAllConfirmationText" = "これにより、すべてのメニューから %@ ショートカットが削除されます。";
+
+"WebApp.TermsOfUse" = "利用規約";
+
+"WebApp.AlertBiometryAccessText" = "%@ にFace IDの使用を許可しますか？";
+"WebApp.AlertBiometryAccessTouchIDText" = "%@ にTouch IDの使用を許可しますか？";
+
+"WebApp.OpenBot" = "ボットを開く";
+"WebApp.ReloadPage" = "ページを再読み込み";
+"WebApp.RemoveBot" = "ボットを削除";
+
+"WebApp.AddToAttachmentText" = "%@ は、添付メニューのオプションとして追加する許可を求めています。これにより、どのチャットからでもアクセスできるようになります。";
+"WebApp.AddToAttachmentAdd" = "追加";
+
+"WebApp.AddToAttachmentUnavailableError" = "このボットは添付メニューに追加できません。";
+"WebApp.AddToAttachmentAlreadyAddedError" = "このボットは既に添付メニューに追加されています。";
+"WebApp.AddToAttachmentSucceeded" = "%@ が添付メニューに追加されました。";
+
+"WebApp.OpenWebViewAlertTitle" = "Webアプリを開く";
+"WebApp.OpenWebViewAlertText" = "%@ は続行するためにWebアプリを開きたいと考えています。\n\nあなたのIPアドレスと基本的なデバイス情報にアクセスできるようになります。";
+
+"WebApp.MessagePreview" = "メッセージプレビュー";
+"WebApp.Send" = "送信";
+
+"WebApp.RemoveConfirmationTitle" = "ボットを削除";
+"WebApp.RemoveConfirmationText" = "添付メニューから %@ を削除しますか？";
+
+"WebApp.Settings" = "設定";
+
+"WebApp.SelectChat" = "チャットを選択";
+
+"WebApp.CloseConfirmation" = "行った変更が保存されない可能性があります。";
+"WebApp.CloseAnyway" = "それでも閉じる";
+
+"WebApp.ShareMyPhoneNumber" = "電話番号を共有";
+"WebApp.ShareMyPhoneNumberConfirmation" = "%2$@ に電話番号 %1$@ を共有してもよろしいですか？";
+
+"WebApp.AddToAttachmentAllowMessages" = "%@ がメッセージを送信することを許可";
+
+"WebApp.LaunchMoreInfo" = "このボットについて詳しく";
+"WebApp.LaunchConfirmation" = "このWebアプリを起動するには、そのWebサイトに接続します。";
+"WebApp.LaunchOpenApp" = "アプリを開く";

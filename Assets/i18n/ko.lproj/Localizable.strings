@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "확인";
+"Common.Cancel" = "취소";
+"Common.Edit" = "편집";
+"Common.edit" = "편집";
+"Common.Done" = "완료";
+"Common.Next" = "다음";
+"Common.Delete" = "삭제";
+"Common.Create" = "생성";
+"Common.Back" = "뒤로";
+"Common.Close" = "닫기";
+"Common.Yes" = "예";
+"Common.No" = "아니오";
+"Common.TakePhotoOrVideo" = "사진 또는 비디오 촬영";
+"Common.TakePhoto" = "사진 촬영";
+"Common.ChoosePhoto" = "사진 선택";
+"Common.of" = "의";
+"Common.Search" = "검색";
+"Common.More" = "더보기";
+"Common.Select" = "선택";
+"Items.NOfM" = "%1$@ / %2$@";
+
+"Common.Reload" = "페이지 새로고침";
+"Common.Share" = "공유";
+"Common.Feedback" = "피드백 &\n신고";
+"Common.Privacy" = "개인정보\n처리방침";
+"Common.Terms" = "이용\n약관";
+"Common.Settings" = "설정";
+"Common.Shortcut" = "홈 화면에 추가";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "메시지 전송을 허용하시겠습니까?";
+"WebApp.AllowWriteConfirmation" = "이렇게 하면 봇 %@ 이(가) %@ 에서 메시지를 보낼 수 있습니다.";
+
+"WebApp.SharePhoneTitle" = "전화번호를 공유하시겠습니까?";
+"WebApp.SharePhoneConfirmation" = "%@ 이(가) 귀하의 전화번호를 알게 됩니다. 이는 다른 서비스와의 통합에 유용할 수 있습니다.";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ 이(가) 귀하의 전화번호를 알게 됩니다. 이는 다른 서비스와의 통합에 유용할 수 있습니다.\n\n또한 봇 차단이 해제됩니다.";
+
+"WebApp.DisclaimerTitle" = "이용약관";
+"WebApp.DisclaimerText" = "귀하는 %@ 와 제휴하지 않은 독립적인 제3자가 운영하는 미니앱을 사용하려고 합니다. 계속하려면 미니앱의 이용약관에 동의해야 합니다.";
+"WebApp.DisclaimerAgree" = "[이용약관]()에 동의합니다";
+"WebApp.DisclaimerContinue" = "계속";
+
+"WebApp.ShortcutsAdded" = "%@ 바로가기가 첨부 메뉴에 추가되었습니다.";
+"WebApp.ShortcutsSettingsAdded" = "%@ 바로가기가 첨부 메뉴와 설정에 추가되었습니다.";
+
+"WebApp.RemoveAllConfirmationText" = "이렇게 하면 모든 메뉴에서 %@ 바로가기가 제거됩니다.";
+
+"WebApp.TermsOfUse" = "이용약관";
+
+"WebApp.AlertBiometryAccessText" = "%@ 에게 Face ID 사용을 허용하시겠습니까?";
+"WebApp.AlertBiometryAccessTouchIDText" = "%@ 에게 Touch ID 사용을 허용하시겠습니까?";
+
+"WebApp.OpenBot" = "봇 열기";
+"WebApp.ReloadPage" = "페이지 새로고침";
+"WebApp.RemoveBot" = "봇 제거";
+
+"WebApp.AddToAttachmentText" = "%@ 이(가) 첨부 메뉴의 옵션으로 추가될 수 있도록 권한을 요청합니다. 이렇게 하면 모든 채팅에서 접근할 수 있습니다.";
+"WebApp.AddToAttachmentAdd" = "추가";
+
+"WebApp.AddToAttachmentUnavailableError" = "이 봇은 첨부 메뉴에 추가할 수 없습니다.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "이 봇은 이미 첨부 메뉴에 추가되어 있습니다.";
+"WebApp.AddToAttachmentSucceeded" = "%@ 이(가) 첨부 메뉴에 추가되었습니다.";
+
+"WebApp.OpenWebViewAlertTitle" = "웹앱 열기";
+"WebApp.OpenWebViewAlertText" = "%@ 이(가) 계속하기 위해 웹앱을 열고 싶어합니다.\n\n귀하의 IP 주소 및 기본 기기 정보에 접근할 수 있게 됩니다.";
+
+"WebApp.MessagePreview" = "메시지 미리보기";
+"WebApp.Send" = "보내기";
+
+"WebApp.RemoveConfirmationTitle" = "봇 제거";
+"WebApp.RemoveConfirmationText" = "첨부 메뉴에서 %@ 을(를) 제거하시겠습니까?";
+
+"WebApp.Settings" = "설정";
+
+"WebApp.SelectChat" = "채팅 선택";
+
+"WebApp.CloseConfirmation" = "변경사항이 저장되지 않을 수 있습니다.";
+"WebApp.CloseAnyway" = "그래도 닫기";
+
+"WebApp.ShareMyPhoneNumber" = "내 전화번호 공유";
+"WebApp.ShareMyPhoneNumberConfirmation" = "%2$@ 에게 전화번호 %1$@ 을(를) 공유하시겠습니까?";
+
+"WebApp.AddToAttachmentAllowMessages" = "%@ 이(가) 메시지를 보낼 수 있도록 허용";
+
+"WebApp.LaunchMoreInfo" = "이 봇에 대한 자세한 정보";
+"WebApp.LaunchConfirmation" = "이 웹앱을 실행하려면 해당 웹사이트에 연결합니다.";
+"WebApp.LaunchOpenApp" = "앱 열기";

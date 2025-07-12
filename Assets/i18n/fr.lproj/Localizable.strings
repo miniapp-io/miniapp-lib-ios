@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "OK";
+"Common.Cancel" = "Annuler";
+"Common.Edit" = "Modifier";
+"Common.edit" = "modifier";
+"Common.Done" = "Terminé";
+"Common.Next" = "Suivant";
+"Common.Delete" = "Supprimer";
+"Common.Create" = "Créer";
+"Common.Back" = "Retour";
+"Common.Close" = "Fermer";
+"Common.Yes" = "Oui";
+"Common.No" = "Non";
+"Common.TakePhotoOrVideo" = "Prendre une photo ou une vidéo";
+"Common.TakePhoto" = "Prendre une photo";
+"Common.ChoosePhoto" = "Choisir une photo";
+"Common.of" = "sur";
+"Common.Search" = "Rechercher";
+"Common.More" = "Plus";
+"Common.Select" = "Sélectionner";
+"Items.NOfM" = "%1$@ sur %2$@";
+
+"Common.Reload" = "Recharger la page";
+"Common.Share" = "Partager";
+"Common.Feedback" = "Commentaires &\nSignaler";
+"Common.Privacy" = "Accord de\nconfidentialité";
+"Common.Terms" = "Accord\nutilisateur";
+"Common.Settings" = "Paramètres";
+"Common.Shortcut" = "Ajouter à l'écran d'accueil";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "Autoriser l'envoi de messages ?";
+"WebApp.AllowWriteConfirmation" = "Cela permettra au bot %@ de vous envoyer des messages sur %@.";
+
+"WebApp.SharePhoneTitle" = "Partager le numéro de téléphone ?";
+"WebApp.SharePhoneConfirmation" = "%@ connaîtra votre numéro de téléphone. Cela peut être utile pour l'intégration avec d'autres services.";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ connaîtra votre numéro de téléphone. Cela peut être utile pour l'intégration avec d'autres services.\n\nCela débloquera également le bot.";
+
+"WebApp.DisclaimerTitle" = "Conditions d'utilisation";
+"WebApp.DisclaimerText" = "Vous êtes sur le point d'utiliser une mini-application exploitée par un tiers indépendant non affilié à %@. Vous devez accepter les conditions d'utilisation des mini-applications pour continuer.";
+"WebApp.DisclaimerAgree" = "J'accepte les [conditions d'utilisation]()";
+"WebApp.DisclaimerContinue" = "Continuer";
+
+"WebApp.ShortcutsAdded" = "Raccourci %@ ajouté au menu des pièces jointes.";
+"WebApp.ShortcutsSettingsAdded" = "Raccourci %@ ajouté au menu des pièces jointes et aux paramètres.";
+
+"WebApp.RemoveAllConfirmationText" = "Cela supprimera les raccourcis %@ de tous les menus.";
+
+"WebApp.TermsOfUse" = "Conditions d'utilisation";
+
+"WebApp.AlertBiometryAccessText" = "Voulez-vous autoriser %@ à utiliser Face ID ?";
+"WebApp.AlertBiometryAccessTouchIDText" = "Voulez-vous autoriser %@ à utiliser Touch ID ?";
+
+"WebApp.OpenBot" = "Ouvrir le bot";
+"WebApp.ReloadPage" = "Recharger la page";
+"WebApp.RemoveBot" = "Supprimer le bot";
+
+"WebApp.AddToAttachmentText" = "%@ demande votre permission pour être ajouté comme option dans votre menu des pièces jointes, afin que vous puissiez y accéder depuis n'importe quel chat.";
+"WebApp.AddToAttachmentAdd" = "Ajouter";
+
+"WebApp.AddToAttachmentUnavailableError" = "Ce bot ne peut pas être ajouté au menu des pièces jointes.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "Ce bot est déjà ajouté à votre menu des pièces jointes.";
+"WebApp.AddToAttachmentSucceeded" = "%@ a été ajouté à votre menu des pièces jointes.";
+
+"WebApp.OpenWebViewAlertTitle" = "Ouvrir l'application Web";
+"WebApp.OpenWebViewAlertText" = "%@ souhaite ouvrir son application Web pour continuer.\n\nElle pourra accéder à votre adresse IP et aux informations de base de l'appareil.";
+
+"WebApp.MessagePreview" = "Aperçu du message";
+"WebApp.Send" = "Envoyer";
+
+"WebApp.RemoveConfirmationTitle" = "Supprimer le bot";
+"WebApp.RemoveConfirmationText" = "Supprimer %@ du menu des pièces jointes ?";
+
+"WebApp.Settings" = "Paramètres";
+
+"WebApp.SelectChat" = "Sélectionner le chat";
+
+"WebApp.CloseConfirmation" = "Les modifications que vous avez apportées peuvent ne pas être sauvegardées.";
+"WebApp.CloseAnyway" = "Fermer quand même";
+
+"WebApp.ShareMyPhoneNumber" = "Partager mon numéro de téléphone";
+"WebApp.ShareMyPhoneNumberConfirmation" = "Êtes-vous sûr de vouloir partager votre numéro de téléphone %1$@ avec %2$@ ?";
+
+"WebApp.AddToAttachmentAllowMessages" = "Autoriser %@ à m'envoyer des messages";
+
+"WebApp.LaunchMoreInfo" = "Plus d'informations sur ce bot";
+"WebApp.LaunchConfirmation" = "Pour lancer cette application Web, vous vous connecterez à son site Web.";
+"WebApp.LaunchOpenApp" = "Ouvrir l'application";

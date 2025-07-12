@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "موافق";
+"Common.Cancel" = "إلغاء";
+"Common.Edit" = "تحرير";
+"Common.edit" = "تحرير";
+"Common.Done" = "تم";
+"Common.Next" = "التالي";
+"Common.Delete" = "حذف";
+"Common.Create" = "إنشاء";
+"Common.Back" = "رجوع";
+"Common.Close" = "إغلاق";
+"Common.Yes" = "نعم";
+"Common.No" = "لا";
+"Common.TakePhotoOrVideo" = "التقاط صورة أو فيديو";
+"Common.TakePhoto" = "التقاط صورة";
+"Common.ChoosePhoto" = "اختيار صورة";
+"Common.of" = "من";
+"Common.Search" = "بحث";
+"Common.More" = "المزيد";
+"Common.Select" = "اختيار";
+"Items.NOfM" = "%1$@ من %2$@";
+
+"Common.Reload" = "إعادة تحميل الصفحة";
+"Common.Share" = "مشاركة";
+"Common.Feedback" = "ملاحظات &\nإبلاغ";
+"Common.Privacy" = "اتفاقية\nالخصوصية";
+"Common.Terms" = "اتفاقية\nالمستخدم";
+"Common.Settings" = "الإعدادات";
+"Common.Shortcut" = "إضافة إلى الشاشة الرئيسية";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "السماح بإرسال الرسائل؟";
+"WebApp.AllowWriteConfirmation" = "سيسمح هذا للبوت %@ بإرسال رسائل إليك على %@.";
+
+"WebApp.SharePhoneTitle" = "مشاركة رقم الهاتف؟";
+"WebApp.SharePhoneConfirmation" = "سيعرف %@ رقم هاتفك. يمكن أن يكون هذا مفيدًا للتكامل مع الخدمات الأخرى.";
+"WebApp.SharePhoneConfirmationUnblock" = "سيعرف %@ رقم هاتفك. يمكن أن يكون هذا مفيدًا للتكامل مع الخدمات الأخرى.\n\nسيؤدي هذا أيضًا إلى إلغاء حظر البوت.";
+
+"WebApp.DisclaimerTitle" = "شروط الاستخدام";
+"WebApp.DisclaimerText" = "أنت على وشك استخدام تطبيق مصغر تشغله جهة مستقلة غير مرتبطة بـ %@. يجب عليك الموافقة على شروط استخدام التطبيقات المصغرة للمتابعة.";
+"WebApp.DisclaimerAgree" = "أوافق على [شروط الاستخدام]()";
+"WebApp.DisclaimerContinue" = "متابعة";
+
+"WebApp.ShortcutsAdded" = "تمت إضافة اختصار %@ إلى قائمة المرفقات.";
+"WebApp.ShortcutsSettingsAdded" = "تمت إضافة اختصار %@ إلى قائمة المرفقات والإعدادات.";
+
+"WebApp.RemoveAllConfirmationText" = "سيؤدي هذا إلى إزالة اختصارات %@ من جميع القوائم.";
+
+"WebApp.TermsOfUse" = "شروط الاستخدام";
+
+"WebApp.AlertBiometryAccessText" = "هل تريد السماح لـ %@ باستخدام Face ID؟";
+"WebApp.AlertBiometryAccessTouchIDText" = "هل تريد السماح لـ %@ باستخدام Touch ID؟";
+
+"WebApp.OpenBot" = "فتح البوت";
+"WebApp.ReloadPage" = "إعادة تحميل الصفحة";
+"WebApp.RemoveBot" = "إزالة البوت";
+
+"WebApp.AddToAttachmentText" = "يطلب %@ إذنك لإضافته كخيار في قائمة المرفقات، حتى تتمكن من الوصول إليه من أي محادثة.";
+"WebApp.AddToAttachmentAdd" = "إضافة";
+
+"WebApp.AddToAttachmentUnavailableError" = "لا يمكن إضافة هذا البوت إلى قائمة المرفقات.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "تمت إضافة هذا البوت بالفعل إلى قائمة المرفقات الخاصة بك.";
+"WebApp.AddToAttachmentSucceeded" = "تمت إضافة %@ إلى قائمة المرفقات الخاصة بك.";
+
+"WebApp.OpenWebViewAlertTitle" = "فتح تطبيق الويب";
+"WebApp.OpenWebViewAlertText" = "يريد %@ فتح تطبيق الويب الخاص به للمتابعة.\n\nسيتمكن من الوصول إلى عنوان IP الخاص بك ومعلومات الجهاز الأساسية.";
+
+"WebApp.MessagePreview" = "معاينة الرسالة";
+"WebApp.Send" = "إرسال";
+
+"WebApp.RemoveConfirmationTitle" = "إزالة البوت";
+"WebApp.RemoveConfirmationText" = "إزالة %@ من قائمة المرفقات؟";
+
+"WebApp.Settings" = "الإعدادات";
+
+"WebApp.SelectChat" = "اختيار المحادثة";
+
+"WebApp.CloseConfirmation" = "قد لا يتم حفظ التغييرات التي قمت بها.";
+"WebApp.CloseAnyway" = "إغلاق على أي حال";
+
+"WebApp.ShareMyPhoneNumber" = "مشاركة رقم هاتفي";
+"WebApp.ShareMyPhoneNumberConfirmation" = "هل أنت متأكد من أنك تريد مشاركة رقم هاتفك %1$@ مع %2$@؟";
+
+"WebApp.AddToAttachmentAllowMessages" = "السماح لـ %@ بإرسال رسائل إلي";
+
+"WebApp.LaunchMoreInfo" = "المزيد عن هذا البوت";
+"WebApp.LaunchConfirmation" = "لتشغيل تطبيق الويب هذا، ستتصل بموقعه الإلكتروني.";
+"WebApp.LaunchOpenApp" = "فتح التطبيق";

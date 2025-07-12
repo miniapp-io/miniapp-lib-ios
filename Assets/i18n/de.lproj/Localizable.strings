@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "OK";
+"Common.Cancel" = "Abbrechen";
+"Common.Edit" = "Bearbeiten";
+"Common.edit" = "bearbeiten";
+"Common.Done" = "Fertig";
+"Common.Next" = "Weiter";
+"Common.Delete" = "Löschen";
+"Common.Create" = "Erstellen";
+"Common.Back" = "Zurück";
+"Common.Close" = "Schließen";
+"Common.Yes" = "Ja";
+"Common.No" = "Nein";
+"Common.TakePhotoOrVideo" = "Foto oder Video aufnehmen";
+"Common.TakePhoto" = "Foto aufnehmen";
+"Common.ChoosePhoto" = "Foto auswählen";
+"Common.of" = "von";
+"Common.Search" = "Suchen";
+"Common.More" = "Mehr";
+"Common.Select" = "Auswählen";
+"Items.NOfM" = "%1$@ von %2$@";
+
+"Common.Reload" = "Seite neu laden";
+"Common.Share" = "Teilen";
+"Common.Feedback" = "Feedback &\nMelden";
+"Common.Privacy" = "Datenschutz-\nvereinbarung";
+"Common.Terms" = "Nutzungs-\nbedingungen";
+"Common.Settings" = "Einstellungen";
+"Common.Shortcut" = "Zum Startbildschirm hinzufügen";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "Nachrichten senden erlauben?";
+"WebApp.AllowWriteConfirmation" = "Dies ermöglicht es dem Bot %@, Ihnen Nachrichten auf %@ zu senden.";
+
+"WebApp.SharePhoneTitle" = "Telefonnummer teilen?";
+"WebApp.SharePhoneConfirmation" = "%@ wird Ihre Telefonnummer kennen. Dies kann für die Integration mit anderen Diensten nützlich sein.";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ wird Ihre Telefonnummer kennen. Dies kann für die Integration mit anderen Diensten nützlich sein.\n\nDies wird auch den Bot entsperren.";
+
+"WebApp.DisclaimerTitle" = "Nutzungsbedingungen";
+"WebApp.DisclaimerText" = "Sie sind dabei, eine Mini-App zu verwenden, die von einer unabhängigen dritten Partei betrieben wird, die nicht mit %@ verbunden ist. Sie müssen den Nutzungsbedingungen für Mini-Apps zustimmen, um fortzufahren.";
+"WebApp.DisclaimerAgree" = "Ich stimme den [Nutzungsbedingungen]() zu";
+"WebApp.DisclaimerContinue" = "Weiter";
+
+"WebApp.ShortcutsAdded" = "%@ Verknüpfung zum Anhang-Menü hinzugefügt.";
+"WebApp.ShortcutsSettingsAdded" = "%@ Verknüpfung zum Anhang-Menü und zu den Einstellungen hinzugefügt.";
+
+"WebApp.RemoveAllConfirmationText" = "Dies entfernt %@ Verknüpfungen aus allen Menüs.";
+
+"WebApp.TermsOfUse" = "Nutzungsbedingungen";
+
+"WebApp.AlertBiometryAccessText" = "Möchten Sie %@ die Verwendung von Face ID erlauben?";
+"WebApp.AlertBiometryAccessTouchIDText" = "Möchten Sie %@ die Verwendung von Touch ID erlauben?";
+
+"WebApp.OpenBot" = "Bot öffnen";
+"WebApp.ReloadPage" = "Seite neu laden";
+"WebApp.RemoveBot" = "Bot entfernen";
+
+"WebApp.AddToAttachmentText" = "%@ bittet um Ihre Erlaubnis, als Option zu Ihrem Anhang-Menü hinzugefügt zu werden, damit Sie von jedem Chat darauf zugreifen können.";
+"WebApp.AddToAttachmentAdd" = "Hinzufügen";
+
+"WebApp.AddToAttachmentUnavailableError" = "Dieser Bot kann nicht zum Anhang-Menü hinzugefügt werden.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "Dieser Bot ist bereits zu Ihrem Anhang-Menü hinzugefügt.";
+"WebApp.AddToAttachmentSucceeded" = "%@ wurde zu Ihrem Anhang-Menü hinzugefügt.";
+
+"WebApp.OpenWebViewAlertTitle" = "Web-App öffnen";
+"WebApp.OpenWebViewAlertText" = "%@ möchte seine Web-App öffnen, um fortzufahren.\n\nSie wird auf Ihre IP-Adresse und grundlegende Geräteinformationen zugreifen können.";
+
+"WebApp.MessagePreview" = "Nachrichtenvorschau";
+"WebApp.Send" = "Senden";
+
+"WebApp.RemoveConfirmationTitle" = "Bot entfernen";
+"WebApp.RemoveConfirmationText" = "%@ aus dem Anhang-Menü entfernen?";
+
+"WebApp.Settings" = "Einstellungen";
+
+"WebApp.SelectChat" = "Chat auswählen";
+
+"WebApp.CloseConfirmation" = "Die von Ihnen vorgenommenen Änderungen werden möglicherweise nicht gespeichert.";
+"WebApp.CloseAnyway" = "Trotzdem schließen";
+
+"WebApp.ShareMyPhoneNumber" = "Meine Telefonnummer teilen";
+"WebApp.ShareMyPhoneNumberConfirmation" = "Sind Sie sicher, dass Sie Ihre Telefonnummer %1$@ mit %2$@ teilen möchten?";
+
+"WebApp.AddToAttachmentAllowMessages" = "%@ erlauben, mir Nachrichten zu senden";
+
+"WebApp.LaunchMoreInfo" = "Mehr über diesen Bot";
+"WebApp.LaunchConfirmation" = "Um diese Web-App zu starten, werden Sie sich mit ihrer Website verbinden.";
+"WebApp.LaunchOpenApp" = "App öffnen";

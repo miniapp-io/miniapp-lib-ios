@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "OK";
+"Common.Cancel" = "Cancelar";
+"Common.Edit" = "Editar";
+"Common.edit" = "editar";
+"Common.Done" = "Concluído";
+"Common.Next" = "Próximo";
+"Common.Delete" = "Excluir";
+"Common.Create" = "Criar";
+"Common.Back" = "Voltar";
+"Common.Close" = "Fechar";
+"Common.Yes" = "Sim";
+"Common.No" = "Não";
+"Common.TakePhotoOrVideo" = "Tirar Foto ou Vídeo";
+"Common.TakePhoto" = "Tirar Foto";
+"Common.ChoosePhoto" = "Escolher Foto";
+"Common.of" = "de";
+"Common.Search" = "Pesquisar";
+"Common.More" = "Mais";
+"Common.Select" = "Selecionar";
+"Items.NOfM" = "%1$@ de %2$@";
+
+"Common.Reload" = "Recarregar Página";
+"Common.Share" = "Compartilhar";
+"Common.Feedback" = "Feedback &\nDenunciar";
+"Common.Privacy" = "Acordo de\nPrivacidade";
+"Common.Terms" = "Acordo do\nUsuário";
+"Common.Settings" = "Configurações";
+"Common.Shortcut" = "Adicionar à Tela Inicial";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "Permitir Envio de Mensagens?";
+"WebApp.AllowWriteConfirmation" = "Isso permitirá que o bot %@ envie mensagens para você em %@.";
+
+"WebApp.SharePhoneTitle" = "Compartilhar Número de Telefone?";
+"WebApp.SharePhoneConfirmation" = "%@ saberá seu número de telefone. Isso pode ser útil para integração com outros serviços.";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ saberá seu número de telefone. Isso pode ser útil para integração com outros serviços.\n\nIsso também desbloqueará o bot.";
+
+"WebApp.DisclaimerTitle" = "Termos de Uso";
+"WebApp.DisclaimerText" = "Você está prestes a usar um mini app operado por uma parte independente não afiliada a %@. Você deve concordar com os Termos de Uso dos mini apps para continuar.";
+"WebApp.DisclaimerAgree" = "Concordo com os [Termos de Uso]()";
+"WebApp.DisclaimerContinue" = "Continuar";
+
+"WebApp.ShortcutsAdded" = "Atalho %@ adicionado no menu de anexos.";
+"WebApp.ShortcutsSettingsAdded" = "Atalho %@ adicionado no menu de anexos e Configurações.";
+
+"WebApp.RemoveAllConfirmationText" = "Isso removerá %@ atalhos de todos os menus.";
+
+"WebApp.TermsOfUse" = "Termos de Uso";
+
+"WebApp.AlertBiometryAccessText" = "Você quer permitir que %@ use Face ID?";
+"WebApp.AlertBiometryAccessTouchIDText" = "Você quer permitir que %@ use Touch ID?";
+
+"WebApp.OpenBot" = "Abrir Bot";
+"WebApp.ReloadPage" = "Recarregar Página";
+"WebApp.RemoveBot" = "Remover Bot";
+
+"WebApp.AddToAttachmentText" = "%@ solicita sua permissão para ser adicionado como uma opção ao seu menu de anexos, para que você possa acessá-lo de qualquer chat.";
+"WebApp.AddToAttachmentAdd" = "Adicionar";
+
+"WebApp.AddToAttachmentUnavailableError" = "Este bot não pode ser adicionado ao menu de anexos.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "Este bot já foi adicionado ao seu menu de anexos.";
+"WebApp.AddToAttachmentSucceeded" = "%@ foi adicionado ao seu menu de anexos.";
+
+"WebApp.OpenWebViewAlertTitle" = "Abrir Web App";
+"WebApp.OpenWebViewAlertText" = "%@ gostaria de abrir seu web app para prosseguir.\n\nEle poderá acessar seu endereço IP e informações básicas do dispositivo.";
+
+"WebApp.MessagePreview" = "Visualização da Mensagem";
+"WebApp.Send" = "Enviar";
+
+"WebApp.RemoveConfirmationTitle" = "Remover Bot";
+"WebApp.RemoveConfirmationText" = "Remover %@ do menu de anexos?";
+
+"WebApp.Settings" = "Configurações";
+
+"WebApp.SelectChat" = "Selecionar Chat";
+
+"WebApp.CloseConfirmation" = "As alterações que você fez podem não ser salvas.";
+"WebApp.CloseAnyway" = "Fechar Mesmo Assim";
+
+"WebApp.ShareMyPhoneNumber" = "Compartilhar Meu Número de Telefone";
+"WebApp.ShareMyPhoneNumberConfirmation" = "Tem certeza de que deseja compartilhar seu número de telefone %1$@ com %2$@?";
+
+"WebApp.AddToAttachmentAllowMessages" = "Permitir que %@ me envie mensagens";
+
+"WebApp.LaunchMoreInfo" = "Mais sobre este bot";
+"WebApp.LaunchConfirmation" = "Para iniciar este web app, você se conectará ao seu site.";
+"WebApp.LaunchOpenApp" = "Abrir App";

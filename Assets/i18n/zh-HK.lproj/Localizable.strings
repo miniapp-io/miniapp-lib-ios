@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "確定";
+"Common.Cancel" = "取消";
+"Common.Edit" = "編輯";
+"Common.edit" = "編輯";
+"Common.Done" = "完成";
+"Common.Next" = "下一步";
+"Common.Delete" = "刪除";
+"Common.Create" = "建立";
+"Common.Back" = "返回";
+"Common.Close" = "關閉";
+"Common.Yes" = "是";
+"Common.No" = "否";
+"Common.TakePhotoOrVideo" = "拍攝照片或影片";
+"Common.TakePhoto" = "拍攝照片";
+"Common.ChoosePhoto" = "選擇照片";
+"Common.of" = "的";
+"Common.Search" = "搜尋";
+"Common.More" = "更多";
+"Common.Select" = "選擇";
+"Items.NOfM" = "%1$@ / %2$@";
+
+"Common.Reload" = "重新載入頁面";
+"Common.Share" = "分享";
+"Common.Feedback" = "意見回饋 & 舉報";
+"Common.Privacy" = "隱私協議";
+"Common.Terms" = "使用者協議";
+"Common.Settings" = "設定";
+"Common.Shortcut" = "加入主畫面";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "允許傳送訊息？";
+"WebApp.AllowWriteConfirmation" = "這將允許機器人 %@ 在 %@ 上向您傳送訊息。";
+
+"WebApp.SharePhoneTitle" = "分享電話號碼？";
+"WebApp.SharePhoneConfirmation" = "%@ 將知道您的電話號碼。這對於與其他服務的整合很有用。";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ 將知道您的電話號碼。這對於與其他服務的整合很有用。\n\n這也將取消封鎖該機器人。";
+
+"WebApp.DisclaimerTitle" = "使用條款";
+"WebApp.DisclaimerText" = "您即將使用由獨立第三方營運的小程式，該第三方與 %@ 無關。您必須同意小程式的使用條款才能繼續。";
+"WebApp.DisclaimerAgree" = "我同意[使用條款]()";
+"WebApp.DisclaimerContinue" = "繼續";
+
+"WebApp.ShortcutsAdded" = "%@ 捷徑已加入附件選單。";
+"WebApp.ShortcutsSettingsAdded" = "%@ 捷徑已加入附件選單和設定。";
+
+"WebApp.RemoveAllConfirmationText" = "這將從所有選單中移除 %@ 捷徑。";
+
+"WebApp.TermsOfUse" = "使用條款";
+
+"WebApp.AlertBiometryAccessText" = "您是否允許 %@ 使用 Face ID？";
+"WebApp.AlertBiometryAccessTouchIDText" = "您是否允許 %@ 使用 Touch ID？";
+
+"WebApp.OpenBot" = "開啟機器人";
+"WebApp.ReloadPage" = "重新載入頁面";
+"WebApp.RemoveBot" = "移除機器人";
+
+"WebApp.AddToAttachmentText" = "%@ 請求您的許可，將其加入為附件選單的選項，以便您可以從任何聊天中存取它。";
+"WebApp.AddToAttachmentAdd" = "加入";
+
+"WebApp.AddToAttachmentUnavailableError" = "此機器人無法加入附件選單。";
+"WebApp.AddToAttachmentAlreadyAddedError" = "此機器人已加入您的附件選單。";
+"WebApp.AddToAttachmentSucceeded" = "%@ 已加入您的附件選單。";
+
+"WebApp.OpenWebViewAlertTitle" = "開啟網頁應用程式";
+"WebApp.OpenWebViewAlertText" = "%@ 想要開啟其網頁應用程式以繼續。\n\n它將能夠存取您的 IP 位址和基本裝置資訊。";
+
+"WebApp.MessagePreview" = "訊息預覽";
+"WebApp.Send" = "傳送";
+
+"WebApp.RemoveConfirmationTitle" = "移除機器人";
+"WebApp.RemoveConfirmationText" = "從附件選單中移除 %@？";
+
+"WebApp.Settings" = "設定";
+
+"WebApp.SelectChat" = "選擇聊天";
+
+"WebApp.CloseConfirmation" = "您所做的變更可能不會儲存。";
+"WebApp.CloseAnyway" = "仍然關閉";
+
+"WebApp.ShareMyPhoneNumber" = "分享我的電話號碼";
+"WebApp.ShareMyPhoneNumberConfirmation" = "您確定要與 %2$@ 分享您的電話號碼 %1$@ 嗎？";
+
+"WebApp.AddToAttachmentAllowMessages" = "允許 %@ 向我傳送訊息";
+
+"WebApp.LaunchMoreInfo" = "關於此機器人的更多資訊";
+"WebApp.LaunchConfirmation" = "要啟動此網頁應用程式，您將連接到其網站。";
+"WebApp.LaunchOpenApp" = "開啟應用程式";

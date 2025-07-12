@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "ОК";
+"Common.Cancel" = "Отмена";
+"Common.Edit" = "Изменить";
+"Common.edit" = "изменить";
+"Common.Done" = "Готово";
+"Common.Next" = "Далее";
+"Common.Delete" = "Удалить";
+"Common.Create" = "Создать";
+"Common.Back" = "Назад";
+"Common.Close" = "Закрыть";
+"Common.Yes" = "Да";
+"Common.No" = "Нет";
+"Common.TakePhotoOrVideo" = "Сделать фото или видео";
+"Common.TakePhoto" = "Сделать фото";
+"Common.ChoosePhoto" = "Выбрать фото";
+"Common.of" = "из";
+"Common.Search" = "Поиск";
+"Common.More" = "Ещё";
+"Common.Select" = "Выбрать";
+"Items.NOfM" = "%1$@ из %2$@";
+
+"Common.Reload" = "Перезагрузить страницу";
+"Common.Share" = "Поделиться";
+"Common.Feedback" = "Обратная связь &\nПожаловаться";
+"Common.Privacy" = "Соглашение о\nконфиденциальности";
+"Common.Terms" = "Пользовательское\nсоглашение";
+"Common.Settings" = "Настройки";
+"Common.Shortcut" = "Добавить на главный экран";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "Разрешить отправку сообщений?";
+"WebApp.AllowWriteConfirmation" = "Это позволит боту %@ отправлять вам сообщения в %@.";
+
+"WebApp.SharePhoneTitle" = "Поделиться номером телефона?";
+"WebApp.SharePhoneConfirmation" = "%@ будет знать ваш номер телефона. Это может быть полезно для интеграции с другими сервисами.";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ будет знать ваш номер телефона. Это может быть полезно для интеграции с другими сервисами.\n\nЭто также разблокирует бота.";
+
+"WebApp.DisclaimerTitle" = "Условия использования";
+"WebApp.DisclaimerText" = "Вы собираетесь использовать мини-приложение, управляемое независимой стороной, не связанной с %@. Вы должны согласиться с условиями использования мини-приложений, чтобы продолжить.";
+"WebApp.DisclaimerAgree" = "Я согласен с [условиями использования]()";
+"WebApp.DisclaimerContinue" = "Продолжить";
+
+"WebApp.ShortcutsAdded" = "Ярлык %@ добавлен в меню вложений.";
+"WebApp.ShortcutsSettingsAdded" = "Ярлык %@ добавлен в меню вложений и настройки.";
+
+"WebApp.RemoveAllConfirmationText" = "Это удалит ярлыки %@ из всех меню.";
+
+"WebApp.TermsOfUse" = "Условия использования";
+
+"WebApp.AlertBiometryAccessText" = "Хотите разрешить %@ использовать Face ID?";
+"WebApp.AlertBiometryAccessTouchIDText" = "Хотите разрешить %@ использовать Touch ID?";
+
+"WebApp.OpenBot" = "Открыть бота";
+"WebApp.ReloadPage" = "Перезагрузить страницу";
+"WebApp.RemoveBot" = "Удалить бота";
+
+"WebApp.AddToAttachmentText" = "%@ запрашивает разрешение на добавление в качестве опции в меню вложений, чтобы вы могли получить к нему доступ из любого чата.";
+"WebApp.AddToAttachmentAdd" = "Добавить";
+
+"WebApp.AddToAttachmentUnavailableError" = "Этот бот не может быть добавлен в меню вложений.";
+"WebApp.AddToAttachmentAlreadyAddedError" = "Этот бот уже добавлен в ваше меню вложений.";
+"WebApp.AddToAttachmentSucceeded" = "%@ добавлен в ваше меню вложений.";
+
+"WebApp.OpenWebViewAlertTitle" = "Открыть веб-приложение";
+"WebApp.OpenWebViewAlertText" = "%@ хочет открыть свое веб-приложение для продолжения.\n\nОно сможет получить доступ к вашему IP-адресу и основной информации об устройстве.";
+
+"WebApp.MessagePreview" = "Предварительный просмотр сообщения";
+"WebApp.Send" = "Отправить";
+
+"WebApp.RemoveConfirmationTitle" = "Удалить бота";
+"WebApp.RemoveConfirmationText" = "Удалить %@ из меню вложений?";
+
+"WebApp.Settings" = "Настройки";
+
+"WebApp.SelectChat" = "Выбрать чат";
+
+"WebApp.CloseConfirmation" = "Внесенные вами изменения могут не сохраниться.";
+"WebApp.CloseAnyway" = "Все равно закрыть";
+
+"WebApp.ShareMyPhoneNumber" = "Поделиться моим номером телефона";
+"WebApp.ShareMyPhoneNumberConfirmation" = "Вы уверены, что хотите поделиться своим номером телефона %1$@ с %2$@?";
+
+"WebApp.AddToAttachmentAllowMessages" = "Разрешить %@ отправлять мне сообщения";
+
+"WebApp.LaunchMoreInfo" = "Больше информации об этом боте";
+"WebApp.LaunchConfirmation" = "Для запуска этого веб-приложения вы подключитесь к его веб-сайту.";
+"WebApp.LaunchOpenApp" = "Открыть приложение";
