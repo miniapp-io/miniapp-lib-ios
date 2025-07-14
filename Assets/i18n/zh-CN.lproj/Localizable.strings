@@ -1,0 +1,88 @@
+// Common
+"Common.OK" = "确定";
+"Common.Cancel" = "取消";
+"Common.Edit" = "编辑";
+"Common.edit" = "编辑";
+"Common.Done" = "完成";
+"Common.Next" = "下一步";
+"Common.Delete" = "删除";
+"Common.Create" = "创建";
+"Common.Back" = "返回";
+"Common.Close" = "关闭";
+"Common.Yes" = "是";
+"Common.No" = "否";
+"Common.TakePhotoOrVideo" = "拍摄照片或视频";
+"Common.TakePhoto" = "拍摄照片";
+"Common.ChoosePhoto" = "选择照片";
+"Common.of" = "的";
+"Common.Search" = "搜索";
+"Common.More" = "更多";
+"Common.Select" = "选择";
+"Items.NOfM" = "%1$@ / %2$@";
+
+"Common.Reload" = "重新加载页面";
+"Common.Share" = "分享";
+"Common.Feedback" = "反馈 & 举报";
+"Common.Privacy" = "隐私协议";
+"Common.Terms" = "用户协议";
+"Common.Settings" = "设置";
+"Common.Shortcut" = "添加到主屏幕";
+
+// WebApp
+"WebApp.AllowWriteTitle" = "允许发送消息？";
+"WebApp.AllowWriteConfirmation" = "这将允许机器人 %@ 在 %@ 上向您发送消息。";
+
+"WebApp.SharePhoneTitle" = "分享电话号码？";
+"WebApp.SharePhoneConfirmation" = "%@ 将知道您的电话号码。这对于与其他服务的集成很有用。";
+"WebApp.SharePhoneConfirmationUnblock" = "%@ 将知道您的电话号码。这对于与其他服务的集成很有用。\n\n这也将取消阻止该机器人。";
+
+"WebApp.DisclaimerTitle" = "使用条款";
+"WebApp.DisclaimerText" = "您即将使用由独立第三方运营的小程序，该第三方与 %@ 无关。您必须同意小程序的使用条款才能继续。";
+"WebApp.DisclaimerAgree" = "我同意[使用条款]()";
+"WebApp.DisclaimerContinue" = "继续";
+
+"WebApp.ShortcutsAdded" = "%@ 快捷方式已添加到附件菜单。";
+"WebApp.ShortcutsSettingsAdded" = "%@ 快捷方式已添加到附件菜单和设置。";
+
+"WebApp.RemoveAllConfirmationText" = "这将从所有菜单中移除 %@ 快捷方式。";
+
+"WebApp.TermsOfUse" = "使用条款";
+
+"WebApp.AlertBiometryAccessText" = "您是否允许 %@ 使用面容 ID？";
+"WebApp.AlertBiometryAccessTouchIDText" = "您是否允许 %@ 使用触控 ID？";
+
+"WebApp.OpenBot" = "打开机器人";
+"WebApp.ReloadPage" = "重新加载页面";
+"WebApp.RemoveBot" = "移除机器人";
+
+"WebApp.AddToAttachmentText" = "%@ 请求您的许可，将其添加为附件菜单的选项，以便您可以从任何聊天中访问它。";
+"WebApp.AddToAttachmentAdd" = "添加";
+
+"WebApp.AddToAttachmentUnavailableError" = "此机器人无法添加到附件菜单。";
+"WebApp.AddToAttachmentAlreadyAddedError" = "此机器人已添加到您的附件菜单。";
+"WebApp.AddToAttachmentSucceeded" = "%@ 已添加到您的附件菜单。";
+
+"WebApp.OpenWebViewAlertTitle" = "打开网页应用";
+"WebApp.OpenWebViewAlertText" = "%@ 想要打开其网页应用以继续。\n\n它将能够访问您的 IP 地址和基本设备信息。";
+
+"WebApp.MessagePreview" = "消息预览";
+"WebApp.Send" = "发送";
+
+"WebApp.RemoveConfirmationTitle" = "移除机器人";
+"WebApp.RemoveConfirmationText" = "从附件菜单中移除 %@？";
+
+"WebApp.Settings" = "设置";
+
+"WebApp.SelectChat" = "选择聊天";
+
+"WebApp.CloseConfirmation" = "您所做的更改可能不会保存。";
+"WebApp.CloseAnyway" = "仍然关闭";
+
+"WebApp.ShareMyPhoneNumber" = "分享我的电话号码";
+"WebApp.ShareMyPhoneNumberConfirmation" = "您确定要与 %2$@ 分享您的电话号码 %1$@ 吗？";
+
+"WebApp.AddToAttachmentAllowMessages" = "允许 %@ 向我发送消息";
+
+"WebApp.LaunchMoreInfo" = "关于此机器人的更多信息";
+"WebApp.LaunchConfirmation" = "要启动此网页应用，您将连接到其网站。";
+"WebApp.LaunchOpenApp" = "打开应用";
