@@ -1895,6 +1895,10 @@ internal final class MiniAppServiceImpl : MiniAppService {
             await DefaultResourceProvider.shared.setLanguage(languageCode: languageCode)
         }
     }
+
+    public func openInDefaultBrowser(url: URL) {
+      UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    }
     
     public func openUrl(viewController: ViewController?,
                         url: String,

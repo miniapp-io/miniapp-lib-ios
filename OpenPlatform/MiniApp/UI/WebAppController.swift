@@ -2230,11 +2230,7 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
         }
         
         if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
-            if true == self.controller?.webAppParameters.isDApp {
-                webView.load(navigationAction.request)
-            } else {
-                MiniAppServiceImpl.instance.openUrl(viewController: self.controller, url: url.absoluteString, webLaunchParams: self.controller?.webAppParameters)
-            }
+           MiniAppServiceImpl.instance.openInDefaultBrowser(url: url)
         }
         
         return nil
