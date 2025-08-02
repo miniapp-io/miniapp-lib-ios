@@ -442,6 +442,14 @@ internal func isHttpScheme(_ url: String) -> Bool {
     return url.lowercased().starts(with: "http")
 }
 
+internal func isBlobScheme(_ url: String) -> Bool {
+    return url.lowercased().starts(with: "blob")
+}
+
+internal func isNormalScheme(_ url: String) -> Bool {
+    return isHttpScheme(url) || isBlobScheme(url)
+}
+
 internal func isMeLink(_ url: String, baseMePaths: [String]) -> Bool {
     if !isHttpScheme(url) {
         return false
