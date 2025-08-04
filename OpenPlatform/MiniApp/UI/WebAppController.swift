@@ -2168,7 +2168,7 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
             decisionHandler(.cancel)
             MiniAppServiceImpl.instance.openUrl(viewController: self.controller, url: url, webLaunchParams: self.controller?.webAppParameters)
         } else {
-            if (!iisNormalScheme(url) && !isLocalFile(url) && !isBlank(url)) {
+            if (!isNormalScheme(url) && !isLocalFile(url) && !isBlank(url)) {
                 MiniAppServiceImpl.instance.openUrl(viewController: self.controller, url: url, webLaunchParams: self.controller?.webAppParameters)
                 decisionHandler(.cancel)
             } else {
