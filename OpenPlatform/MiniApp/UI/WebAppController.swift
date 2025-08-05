@@ -1930,7 +1930,7 @@ extension WebAppController.Node {
             return
         }
         
-        if let currentState = self.currentState, currentState.accessRequested {
+        if let currentState = self.currentState, currentState.accessGranted {
             self.sendBiometryInfoReceivedEvent()
             return
         }
