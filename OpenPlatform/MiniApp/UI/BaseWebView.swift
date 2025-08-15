@@ -175,7 +175,7 @@ internal extension WKWebView {
             var newUserAgent = originalUserAgent
                 .replacingOccurrences(of: mobileId, with: modifiedOsVersion + " " + mobileId) // Insert Version/18.1 before Mobile/xxxxxx
             
-            let userAgentName = mobileId + " MiniAppX/\(bundleVersionStr)"
+            let userAgentName = mobileId + " Safari/604.1 MiniAppX IOS/\(bundleVersionStr)"
             
             BaseWebView.userAgentString = userAgentName
             
