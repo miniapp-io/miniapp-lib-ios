@@ -129,7 +129,7 @@ internal extension WKWebView {
     func defaultUserAgent() -> String {
         getBundleVersion()
         
-        return isIPhone() ? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 MiniAppX/\(bundleVersionStr)" : "Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 MiniAppX/\(bundleVersionStr)"
+        return isIPhone() ? "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 MiniAppX IOS/\(bundleVersionStr)" : "Mozilla/5.0 (iPad; CPU OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 MiniAppX IOS/\(bundleVersionStr)"
     }
     
     func isIPhone() -> Bool {
