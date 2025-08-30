@@ -139,6 +139,7 @@ internal class OpenPlatformPluginImpl : OpenPlatformPlugin {
             }
             var cacheData:String? = loadCodableData(forKey: strongSelf._cacheKey)
             if let cacheToken = cacheData {
+                print("MiniAppX: Use Jwt from cache!")
                 nextStep(cacheToken, {
                     saveCodableData(nil, forKey: strongSelf._cacheKey)
                     Task {
@@ -153,6 +154,7 @@ internal class OpenPlatformPluginImpl : OpenPlatformPlugin {
             } else {
                 Task {
                     if let token = await idTokenProvider() {
+                        print("MiniAppX: Use Jwt fome provider!")
                         nextStep(token, nil, complete)
                         saveCodableData(token, forKey: strongSelf._cacheKey)
                     } else {
@@ -197,6 +199,7 @@ internal class OpenPlatformPluginImpl : OpenPlatformPlugin {
         SessionProvider.shared.token = nil
         saveCodableData(nil, forKey: self._cacheKey)
         WebAppLruCache.removeAll()
+        print("MiniAppX: signOut invoke!")
     }
     
     override public func getBotService() -> BotService? {

@@ -1504,7 +1504,7 @@ extension WebAppController.Node {
                                 URLQueryItem(name: key, value: value)
                             })
                 
-                            if let queryStr = components.query {
+                            if let queryStr = components.query, !queryStr.isEmpty {
                                 url = launchInfo.url + "&" + queryStr
                             } else {
                                 url = launchInfo.url

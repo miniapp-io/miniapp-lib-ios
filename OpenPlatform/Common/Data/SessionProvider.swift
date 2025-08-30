@@ -51,9 +51,8 @@ internal class SessionProvider {
     }
     
     private func save() {
-        guard let token = _token else { return }
         queue.async(flags: .barrier) {
-            saveCodableData(token, forKey: self.sessionKey)
+            saveCodableData(self._token, forKey: self.sessionKey)
         }
     }
 }
