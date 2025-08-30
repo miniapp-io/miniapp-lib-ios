@@ -859,8 +859,11 @@ internal extension WebAppController {
 }
 
 extension WebAppController : IMiniApp {
-    
     func reloadPage() {
+        if let webView = self.controllerNode.webAppWebView, webView.isExpired {
+            self.controllerNode.loadPage()
+            return
+        }
         guard let _ = self.mUrl else {
             self.controllerNode.loadPage()
             return

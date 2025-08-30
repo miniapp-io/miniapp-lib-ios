@@ -325,6 +325,7 @@ public struct DAppDto: Codable {
     public let title: String?
     public let url: String?
     public let description: String?
+    public let shortDescription: String?
     public let iconUrl: String?
     public let bannerUrl: String?
     public let createAt: Int?
@@ -336,6 +337,7 @@ public struct DAppDto: Codable {
         case title
         case url
         case description
+        case shortDescription = "short_description"
         case iconUrl = "icon_url"
         case bannerUrl = "banner_url"
         case createAt = "create_at"
@@ -390,6 +392,7 @@ public struct MiniAppDto: Codable {
     public let identifier: String?
     public let title: String?
     public let description: String?
+    public let shortDescription: String?
     public let iconUrl: String?
     public let bannerUrl: String?
     public let botId: String?
@@ -404,6 +407,7 @@ public struct MiniAppDto: Codable {
         case identifier
         case title
         case description
+        case shortDescription = "short_description"
         case iconUrl = "icon_url"
         case bannerUrl = "banner_url"
         case botId = "bot_id"

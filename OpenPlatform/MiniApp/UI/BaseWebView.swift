@@ -35,6 +35,14 @@ internal class BaseWebView: WKWebView {
     
     var cacheData: String? = nil
     
+    var expirationTimestamp: TimeInterval?
+    
+    var isExpired: Bool {
+        guard let timestamp = expirationTimestamp else { return false }
+        let currentTimestamp = Date().timeIntervalSince1970 * 1000.0
+        return currentTimestamp > timestamp
+    }
+    
     var handleDismiss: (() -> Void)? = nil
     
     var canGoBackObseve: ((Bool) -> Void)? = nil

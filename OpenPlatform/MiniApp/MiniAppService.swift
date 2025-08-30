@@ -1376,6 +1376,11 @@ internal final class MiniAppServiceImpl : MiniAppService {
                             
                             let cacheData =  "\(webConfig.startParams ?? "")_\(DefaultResourceProvider.shared.getLanguageCode())_\(DefaultResourceProvider.shared.isDark())"
                             
+                            if let webView = WebAppLruCache.get(key: cacheKey), webView.isExpired {
+                                webView.handleDismiss?()
+                                WebAppLruCache.remove(key: cacheKey)
+                            }
+
                             if let webView = WebAppLruCache.get(key: cacheKey), cacheData == webView.cacheData {
                                 if webView.isDismiss && !webView.isPageLoaded {
                                     webView.reload()
@@ -1991,6 +1996,13 @@ internal final class MiniAppServiceImpl : MiniAppService {
             
             if let cacheKey = params.toCacheKey() {
                 if let cacheWebView = WebAppLruCache.get(key: cacheKey) {
+
+                    if cacheWebView.isExpired {
+                        cacheWebView.handleDismiss?()
+                        WebAppLruCache.remove(key: cacheKey)
+                        return nil
+                    }
+
                     if let topWebView = (getTopMiniApp() as? WebAppController)?.getWebView(), topWebView == cacheWebView {
                         if FloatingWindowManager.shared.currentApp() === getTopMiniApp() {
                             FloatingWindowManager.shared.maximize()

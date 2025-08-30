@@ -175,6 +175,8 @@ internal final class WebAppWebView: BaseWebView {
         
         super.init(frame: CGRect(), configuration: configuration)
         
+        self.expirationTimestamp = Date().addingTimeInterval(3600).timeIntervalSince1970 * 1000.0
+        
         // Use WKWebView to evaluate JavaScript to get User-Agent
         if let _ = BaseWebView.userAgentString {} else {
             evaluateJavaScript("navigator.userAgent") { (userAgent, error) in
