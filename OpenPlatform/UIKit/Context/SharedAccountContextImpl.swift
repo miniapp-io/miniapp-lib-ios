@@ -6,34 +6,24 @@
 //
 import UIKit
 
-fileprivate func loadStrings(languageCode: String) -> [String: String]? {
-    let bundle = Bundle(for: DefaultResourceProvider.self)
-    guard let path = bundle.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: languageCode),
-          FileManager.default.fileExists(atPath: path) else {
-        return nil
-    }
-
-    return NSDictionary(contentsOf: URL(fileURLWithPath: path)) as? [String: String]
-}
-
 internal class DefaultResourceProvider : IResourceProvider {
     
     public static let shared = DefaultResourceProvider()
 
     private var languageCode: String = "en"
-    private var strings : [String : String] = [:]
     private var userInterfaceStyle: UIUserInterfaceStyle = .light
+    private var localizedStrings: [String:String] = [:]
     
     private init() {}
     
     public func initResouce(userInterfaceStyle: UIUserInterfaceStyle, languageCode: String) async {
         self.userInterfaceStyle = userInterfaceStyle
-        self.languageCode = languageCode
-        if let strings = loadStrings(languageCode: languageCode) {
-            self.strings = strings
+        if UIKitResourceManager.isLanguageSupported(language: languageCode) {
+            self.languageCode = languageCode
         } else {
-            await self.setLanguage(languageCode: "en")
+            self.languageCode = "en"
         }
+        self.localizedStrings = UIKitResourceManager.localizedStrings(language: self.languageCode)
     }
     
     public func setUserInterfaceStyle(userInterfaceStyle: UIUserInterfaceStyle) {
@@ -48,10 +38,12 @@ internal class DefaultResourceProvider : IResourceProvider {
         if(self.languageCode == languageCode) {
             return
         }
-        self.languageCode = languageCode
-        if let strings = loadStrings(languageCode: languageCode) {
-            self.strings = strings
+        if UIKitResourceManager.isLanguageSupported(language: languageCode) {
+            self.languageCode = languageCode
+        } else {
+            self.languageCode = "en"
         }
+        self.localizedStrings = UIKitResourceManager.localizedStrings(language: self.languageCode)
     }
     
     public func setUserInterfaceStyle(_ userInterfaceStyle: UIUserInterfaceStyle) {
@@ -63,11 +55,11 @@ internal class DefaultResourceProvider : IResourceProvider {
     }
     
     public func getString(key: String) -> String? {
-        return self.strings[key]
+        return localizedStrings[key]
     }
     
     public func getString(key: String, withValues values: [CVarArg]) -> String {
-        return formatString(template: self.strings[key] ?? "", withValues: values)
+        return formatString(template: getString(key: key) ?? "", withValues: values)
     }
     
     public func getColor(key: String) -> UIColor {

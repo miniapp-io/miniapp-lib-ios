@@ -17,7 +17,7 @@ enum OW3MenuType: String {
     case SHORTCUT
 }
 
-// 模拟菜单项数据
+// Mock menu item data  
 internal struct MenuItem {
     let type: OW3MenuType
     let title: String
@@ -26,11 +26,11 @@ internal struct MenuItem {
 
 internal class MenusBottomSheetViewController: UIViewController {
     
-    let buttonsPerRow = 4 // 每行最多显示4个按钮
-    let spacing: CGFloat = 10  // 按钮之间的间隔
-    let sideMargin: CGFloat = 10  // 左右边距
-    let topMargin: CGFloat = 35  // 顶部边距
-    let buttonHeight: CGFloat = 120  // 每个按钮的高度
+    let buttonsPerRow = 4 // Maximum 4 buttons per row
+    let spacing: CGFloat = 10  // Spacing between buttons
+    let sideMargin: CGFloat = 10  // Left and right margins
+    let topMargin: CGFloat = 35  // Top margin
+    let buttonHeight: CGFloat = 120  // Height of each button
     
     var isDark = MiniAppServiceImpl.instance.resourceProvider.isDark()
     var menus: [MenuItem] = []
@@ -42,14 +42,14 @@ internal class MenusBottomSheetViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // 设置背景颜色，模拟底部弹窗的样式
+        // Set background color, simulate bottom sheet style
         view.backgroundColor = UIColor(hexString: isDark ? "#1C1D22" : "#F2F3F5")
         view.layer.cornerRadius = 20
         
-        // 如果系统版本支持 UISheetPresentationController
+        // If system version supports UISheetPresentationController
         if #available(iOS 15.0, *) {
             if let sheetPresentationController = self.sheetPresentationController {
-                // 设置底部弹窗的样式和行为
+                // Set bottom sheet style and behavior
                 if #available(iOS 16.0, *) {
                     let contentHeight = CGFloat((menus.count + buttonsPerRow - 1) / buttonsPerRow) * buttonHeight + CGFloat((menus.count + buttonsPerRow - 1) / buttonsPerRow) * spacing + topMargin
                     
@@ -61,21 +61,20 @@ internal class MenusBottomSheetViewController: UIViewController {
                     sheetPresentationController.detents = [.medium()]
                 }
                 
-                sheetPresentationController.prefersGrabberVisible = true // 显示拖拽的把手
-                sheetPresentationController.preferredCornerRadius = 20 // 设置圆角
+                sheetPresentationController.prefersGrabberVisible = true // Show drag handle
+                sheetPresentationController.preferredCornerRadius = 20 // Set corner radius
             }
         }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // 构建菜单按钮
+        // Build menu buttons
         buildMenus()
     }
     
     private func getImage(named name: String) -> UIImage? {
-        let bundle = Bundle(for: ToolBarComponent.self)
-        return UIImage(named: name, in: bundle, compatibleWith: nil)
+        return UIKitResourceManager.image(named: name)
     }
     
     private func resizeImage(_ image: UIImage, to size: CGSize) -> UIImage? {
@@ -93,12 +92,12 @@ internal class MenusBottomSheetViewController: UIViewController {
         return boundingBox.height
     }
     
-    // 构建菜单按钮
+    // Build menu buttons
     private func buildMenus() {
         let buttonContainer = self.view
         
-        var buttonCount = 0 // 当前行按钮数
-        var rowIndex = 0 // 用于跟踪行数，设置行间距
+        var buttonCount = 0 // Current row button count
+        var rowIndex = 0 // Used to track row count, set row spacing
         
         let totalWidth = self.view.safeAreaLayoutGuide.layoutFrame.width
         
@@ -109,11 +108,11 @@ internal class MenusBottomSheetViewController: UIViewController {
             titleLabelHeight = max(titleLabelHeight, calLabelHeight(menu.title, viewWidth: buttonWidth))
         }
         
-        // 动态生成按钮
+        // Dynamically generate buttons
         for (index, menu) in menus.enumerated() {
             if buttonCount == buttonsPerRow {
-                rowIndex += 1 // 每添加一行，行数增加
-                buttonCount = 0 // 每次新建一行时，按钮计数器重置为 0
+                rowIndex += 1 // Each time a new row is added, the row count increases
+                buttonCount = 0 // Each time a new row is created, the button counter is reset to 0
             }
             
             let button = LLCustomButtons(labelHeight: titleLabelHeight)
@@ -138,30 +137,30 @@ internal class MenusBottomSheetViewController: UIViewController {
         }
     }
     
-    // 按钮点击事件
+    // Button click event
     @objc private func buttonClicked(_ sender: UIButton) {
-        // 触发点击事件的回调
+        // Trigger callback for click event
         dismiss(animated: true, completion: nil)
         print("Button clicked: \(sender.tag)")
         itemClickListener?(sender.tag)
     }
     
-    // 设置菜单点击事件的监听器
+    // Set menu click event listener
     func setItemClickListener(_ listener: @escaping (Int) -> Void) {
         self.itemClickListener = listener
     }
 }
 
 internal class LLCustomButtons: UIControl {
-    /// 布局类型 (同时有标题和图片的时候生效)
+        /// Layout type (effective when both title and image are present)
     internal enum Layout {
-        /// 标题在左
+        /// Title on the left
         case titleLeft
-        /// 标题在右
+        /// Title on the right
         case titleRight
-        /// 标题在上
+        /// Title on the top
         case titleTop
-        /// 标题在下
+        /// Title on the bottom
         case titleBottom
     }
 
@@ -169,52 +168,52 @@ internal class LLCustomButtons: UIControl {
         didSet { layoutIfNeeded() }
     }
 
-    /// 标题
+    /// Title
     public lazy var titleLabel = LLCustomButtonLabel()
 
-    /// 图片
+    /// Image
     public lazy var imageView = UIImageView()
 
-    /// 水平间距
+    /// Horizontal spacing
     public var horizontalSpace: CGFloat = 4.0
 
-    /// 竖直间距
+    /// Vertical spacing
     public var verticalSpace: CGFloat = 4.0
 
-    /// 高亮背景色
+    /// Highlighted background color
     public var hightlightBackColor: UIColor?
 
-    /// 渐变高亮色
+    /// Gradient highlighted color
     public var gradientHightlightBackColors: [CGColor?] = []
     
-    /// 文本颜色
+    /// Text color
     private var normalTextColor: UIColor = .black
     
-    /// 按钮点击高亮文本颜色
+    /// Button click highlighted text color
     public var hightlightTextColor: UIColor?
 
-    /// 背景色
+    /// Background color
     private var previousBackgroundColor: UIColor = .clear
 
-    /// 渐变色数组
+    /// Gradient color array
     private var gradientColors: [CGColor?] = []
 
-    /// 渐变色layer
+    /// Gradient layer
     private var gradientLayer: CAGradientLayer?
 
-    /// 高亮色layer
+    /// Highlighted layer
     private var hightLigihtLayer: CAGradientLayer?
 
-    /// 是否长按
+    /// Whether long press
     private var isTouched: Bool = false
 
-    /// 每组颜色所在位置（范围0~1)
+    /// Each group of colors所在位置（范围0~1)
     private var colorLocations: [NSNumber] = [0.0, 1.0]
 
-    /// 开始位置 （默认是矩形左上角）
+    /// Start position （default is top left corner of rectangle）
     private var startPoint = CGPoint(x: 0, y: 0)
 
-    /// 结束位置（默认是矩形右上角）
+    /// End position（default is top right corner of rectangle）
     private var endPoint = CGPoint(x: 1, y: 0)
     
     private var labelHeight: CGFloat? = nil
@@ -242,7 +241,7 @@ internal class LLCustomButtons: UIControl {
         titleLabel.textColor = .black
         titleLabel.numberOfLines = 2
         titleLabel.lineBreakMode = .byTruncatingTail
-        /// 不管是点语法设值还是方法设值都在这里处理
+        /// Whether the value is set by point syntax or method is processed here
         titleLabel.setTitleText = { [unowned self] in
             if titleLabel.text == nil || titleLabel.text == "" {
                 titleLabel.isHidden = true
@@ -278,7 +277,7 @@ internal class LLCustomButtons: UIControl {
         setNeedsLayout()
     }
 
-    /// 渐变色背景设置
+    /// Gradient background setting
    public func gradientColor(colors: [CGColor?], startPoint: CGPoint = CGPoint(x: 0, y: 0), endPoint: CGPoint = CGPoint(x: 1, y: 0), colorLocations: [NSNumber] = [0, 1]) {
         guard let gradient = gradientLayer == nil ? CAGradientLayer() : gradientLayer else { return }
         gradient.locations = colorLocations
@@ -293,7 +292,7 @@ internal class LLCustomButtons: UIControl {
         self.endPoint = endPoint
     }
 
-    /// 移除渐变层
+    /// Remove gradient layer
     public func removeGradientLayer() {
         gradientLayer?.removeFromSuperlayer()
         gradientHightlightBackColors.removeAll()
@@ -301,27 +300,27 @@ internal class LLCustomButtons: UIControl {
     }
 }
 
-// MARK: - 控件布局
+// MARK: - Control layout
 
 extension LLCustomButtons {
     override public func layoutSubviews() {
         super.layoutSubviews()
         guard frame.size.width > 0, frame.size.height > 0 else { return }
-        // ======== 渐变色层部分 ============
+        // ======== Gradient layer part ============
         if let gradientLayer = gradientLayer {
-            // 去除隐式动画
+            // Remove implicit animation
             CATransaction.begin()
             CATransaction.setDisableActions(true)
             
-            // KVC取出Button圆角值，渐变层也要设置
+            // Get the button corner radius value, the gradient layer也要设置
             gradientLayer.cornerRadius = layer.value(forKeyPath: "cornerRadius") as? CGFloat ?? 0
-            // 渐变色frame设置
+            // Set the gradient frame
             gradientLayer.frame = bounds
             
             CATransaction.commit()
         }
 
-        // ======== 子控件布局部分 ============
+        // ======== Sub-control layout part ============
         let viewWidth = frame.size.width
         let viewHeight = frame.size.height
         let text = titleLabel.text
@@ -363,7 +362,7 @@ extension LLCustomButtons {
         }
     }
 
-    /// 更新控件大小
+    /// Update control size
     func updateViewSize(with targetView: UIView, size: CGSize) {
         var rect = targetView.frame
         rect.size.width = size.width
@@ -371,7 +370,7 @@ extension LLCustomButtons {
         targetView.frame = rect
     }
 
-    /// 计算文本大小
+    /// Calculate text size
     func labelSize(text: String?, maxSize: CGSize, font: UIFont) -> CGSize {
         guard let text = text else { return CGSize.zero }
         let constraintRect = CGSize(width: maxSize.width, height: maxSize.height)
@@ -380,7 +379,7 @@ extension LLCustomButtons {
     }
 }
 
-// MARK: - 按钮点击效果
+// MARK: - Button click effect
 
 internal extension LLCustomButtons {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -392,21 +391,21 @@ internal extension LLCustomButtons {
         } else if let hightlightBackColor = hightlightBackColor {
             hightLigihtLayer.colors = [hightlightBackColor.cgColor, hightlightBackColor.cgColor] as [Any]
         }
-        // 文字高亮色
+        // Text highlighted color
         if hightlightTextColor != nil {
             titleLabel.isHightlightColor = true
             titleLabel.textColor = hightlightTextColor
             titleLabel.isHightlightColor = false
         }
-        // 添加高亮背景色layer
+        // Add highlighted background color layer
         layer.insertSublayer(hightLigihtLayer, below: titleLabel.layer)
 
-        // 高亮展示0.2秒
+        // Highlighted display for 0.2 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             if !self.isTouched {
-                // 移除高亮背景layer
+                // Remove highlighted background layer
                 hightLigihtLayer.removeFromSuperlayer()
-                // 如果有设置文本高亮 则恢复
+                // If text highlighting is set, restore
                 if self.hightlightTextColor != nil{
                     self.titleLabel.textColor = self.normalTextColor
                 }
@@ -456,15 +455,15 @@ internal extension LLCustomButtons {
     }
 }
 
-// MARK: - 自定义按钮的lable
+// MARK: - Custom button label
 internal class LLCustomButtonLabel: UILabel {
     var setTitleText: (() -> Void)?
-    var setTitleColor: (() -> Void)?
+    var setTitleColor: (() -> Void)?    
     
-    // 是否是高亮色
+    // Whether it is a highlighted color
     var isHightlightColor: Bool = false
      
-   /// 保证任何方式赋值都能做相应处理
+   /// Ensure that any way of assigning values can do the corresponding processing
     public override var text: String? {
        didSet {
            setTitleText?()
@@ -479,7 +478,7 @@ internal class LLCustomButtonLabel: UILabel {
     
     public override var textColor: UIColor?{
         didSet {
-            // 如果是设置高亮色 则不触发回调
+            // If it is a highlighted color, it will not trigger the callback
             guard !isHightlightColor else { return }
             setTitleColor?()
         }

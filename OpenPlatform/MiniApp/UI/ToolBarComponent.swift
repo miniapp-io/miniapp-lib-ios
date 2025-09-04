@@ -64,8 +64,7 @@ internal class ToolBarComponent : UIView {
     }
     
     private func getImage(named name: String) -> UIImage? {
-        let bundle = Bundle(for: ToolBarComponent.self)
-        return UIImage(named: name, in: bundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
+        return UIKitResourceManager.image(named: name)
     }
     
     private func setupUI() {
