@@ -74,7 +74,7 @@ internal class MenusBottomSheetViewController: UIViewController {
     }
     
     private func getImage(named name: String) -> UIImage? {
-        return UIKitResourceManager.image(named: name)
+        return UIKitResourceManager.image(named: name, false)
     }
     
     private func resizeImage(_ image: UIImage, to size: CGSize) -> UIImage? {

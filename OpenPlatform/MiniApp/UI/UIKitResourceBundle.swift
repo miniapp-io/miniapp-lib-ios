@@ -20,8 +20,11 @@ public class UIKitResourceManager {
         return Bundle.uikitResource.localizedString(forKey: key, value: nil, table: nil)
     }
     
-    public static func image(named name: String) -> UIImage? {
-        return UIImage(named: name, in: Bundle.uikitResource, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
+    public static func image(named name: String, _ alwaysTemplate: Bool = true) -> UIImage? {
+        if alwaysTemplate {
+            return UIImage(named: name, in: Bundle.uikitResource, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
+        }
+        return UIImage(named: name, in: Bundle.uikitResource, compatibleWith: nil)
     }
     
     public static func path(forResource name: String, ofType ext: String? = nil) -> String? {
