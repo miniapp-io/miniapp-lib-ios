@@ -58,8 +58,7 @@ internal class PageLoadingView: UIView {
     }
     
     private func getImage(named name: String) -> UIImage? {
-        let bundle = Bundle(for: PageLoadingView.self)
-        return UIImage(named: name, in: bundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
+        return UIKitResourceManager.image(named: name)
     }
     
     func updateIconUrl(_ url: String?) {

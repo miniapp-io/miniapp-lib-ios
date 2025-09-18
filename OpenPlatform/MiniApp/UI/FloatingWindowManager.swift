@@ -156,8 +156,7 @@ internal class FloatingWindowManager {
     }
     
     private func getImage(named name: String) -> UIImage? {
-        let bundle = Bundle(for: FloatingWindowManager.self)
-        return UIImage(named: name, in: bundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
+        return UIKitResourceManager.image(named: name)
     }
     
     // Hide and destroy floating window

@@ -21,7 +21,7 @@ public class UIKitResourceManager {
     }
     
     public static func image(named name: String) -> UIImage? {
-        return UIImage(named: name, in: Bundle.uikitResource, compatibleWith: nil)
+        return UIImage(named: name, in: Bundle.uikitResource, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
     }
     
     public static func path(forResource name: String, ofType ext: String? = nil) -> String? {
