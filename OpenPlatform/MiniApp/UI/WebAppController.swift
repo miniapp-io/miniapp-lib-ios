@@ -1098,19 +1098,23 @@ extension WebAppController.Node {
             self._webAppWebView = webView
         } else {
             var cacheWebView: WebAppWebView? = nil
-            if let cacheKey = controller.getCacheKey() {
-                cacheWebView = WebAppLruCache.get(key: cacheKey) as? WebAppWebView
-            }
+            let cacheKey = controller.getCacheKey() ?? ""
             
-            let paramString = controller.webAppParameters.params?.map { key,value in
-                "\(key)=\(value)"
-            }.joined(separator: "&")
+            cacheWebView = WebAppLruCache.get(key: cacheKey) as? WebAppWebView
             
-            let cacheData =  "\(controller.webAppParameters.startParams ?? "")_\(DefaultResourceProvider.shared.getLanguageCode())_\(DefaultResourceProvider.shared.isDark())_\(paramString)"
+            let paramString = controller.webAppParameters.params?
+                .sorted(by: { $0.key < $1.key }) // 按键排序
+                .map { key, value in
+                    "\(key)_\(value)"
+                }
+                .joined(separator: "&") ?? ""
             
-            let refreshFlag = !( nil != cacheWebView && cacheWebView?.cacheData == cacheData)
-            if refreshFlag {
+            let cacheData = "\(controller.webAppParameters.startParams ?? "")_\(DefaultResourceProvider.shared.getLanguageCode())_\(DefaultResourceProvider.shared.isDark())_\(paramString)"
+            
+            if cacheWebView != nil && cacheWebView?.cacheData != cacheData {
+                cacheWebView?.handleDismiss?()
                 cacheWebView = nil
+                WebAppLruCache.remove(key: cacheKey)
             }
             
             cacheWebView?.isDismiss = false

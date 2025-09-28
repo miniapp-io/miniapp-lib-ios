@@ -1378,7 +1378,6 @@ internal final class MiniAppServiceImpl : MiniAppService {
                             
                             if let webView = WebAppLruCache.get(key: cacheKey), webView.isExpired {
                                 webView.handleDismiss?()
-                                WebAppLruCache.remove(key: cacheKey)
                             }
 
                             if let webView = WebAppLruCache.get(key: cacheKey), cacheData == webView.cacheData {
