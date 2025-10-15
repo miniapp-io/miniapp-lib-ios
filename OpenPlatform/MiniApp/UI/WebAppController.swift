@@ -28,6 +28,10 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
     fileprivate let toolBarWidth: CGFloat = 109
     fileprivate let toolBarHeight: CGFloat = 30.0
     
+    fileprivate var floatingBackButton: UIView?
+    fileprivate let backButtonWidth: CGFloat = 30.0
+    fileprivate let backButtonWHeight: CGFloat = 30.0
+    
     private var titleView: CounterControllerTitleView?
     fileprivate let cancelButtonNode: WebAppCancelButtonNode
     private var useWeChatStyle: Bool = true
@@ -172,6 +176,7 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
     override public func loadView() {
         super.loadView()
         self.createToolBarView()
+        self.createBackButtonView()
     }
     
     public func isContainerPanningUpdated(_ isPanning: Bool) {
@@ -629,6 +634,33 @@ internal extension WebAppController {
         self.showMenuBottomSheet()
     }
     
+    private func createBackButtonView() {
+        let statusBarHeight:CGFloat!
+        if #available(iOS 13.0, *) {
+            let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+            statusBarHeight = window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
+        } else {
+            statusBarHeight = UIApplication.shared.statusBarFrame.height
+        }
+        
+
+        let backButtonX = 16.0
+        let backButtonY = CGFloat( self.isFullScreenMod() ? (statusBarHeight + 14) : 14)
+        
+        let backButton = BackComponent(frame: CGRect(x: backButtonX, y: backButtonY, width: backButtonWidth, height: backButtonWHeight))
+        
+        backButton.back = { [weak self] in
+            self?.cancelPressed()
+        }
+        
+        // Add floating button to view
+        view.addSubview(backButton)
+        
+        backButton.isHidden = true
+        
+        floatingBackButton = backButton
+    }
+    
     private func createToolBarView() {
         
         
@@ -709,8 +741,11 @@ internal extension WebAppController {
         let isIPhone = UIDevice.current.userInterfaceIdiom == .phone
         if !isIPhone {
             floatingToolBar?.frame.origin.x = self.controllerNode.frame.width - toolBarWidth - 16
+            floatingBackButton?.frame.origin.x = 16.0
         }
-        floatingToolBar?.frame.origin.y = CGFloat( self.isFullScreenMod() ? (statusBarHeight + 14) : 14)
+        let originY = CGFloat( self.isFullScreenMod() ? (statusBarHeight + 14) : 14)
+        floatingToolBar?.frame.origin.y = originY
+        floatingBackButton?.frame.origin.y = originY
     }
     
     var mediaPickerContext: AttachmentMediaPickerContext? {
@@ -773,15 +808,19 @@ internal extension WebAppController {
                 if self.floatingToolBar?.alpha == 1 {
                     UIView.animate(withDuration: 0.2, animations: { [weak self] in
                         self?.floatingToolBar?.alpha = 0
+                        self?.floatingBackButton?.alpha = 0
                     }, completion: {  [weak self] _ in
                         self?.floatingToolBar?.alpha = 0
+                        self?.floatingBackButton?.alpha = 0
                     })
                 }
             } else if self.floatingToolBar?.alpha == 0 {
                 UIView.animate(withDuration: 0.2, animations: { [weak self] in
                     self?.floatingToolBar?.alpha = 1
+                    self?.floatingBackButton?.alpha = 1
                 }, completion: {  [weak self] _ in
                     self?.floatingToolBar?.alpha = 1
+                    self?.floatingBackButton?.alpha = 1
                 })
             }
         }
@@ -999,6 +1038,9 @@ extension WebAppController : IMiniApp {
         self.controllerNode.view.addSubview(webView)
         if let toolBar = self.floatingToolBar {
             self.view.bringSubviewToFront(toolBar)
+        }
+        if let backButtonView = self.floatingBackButton {
+            self.view.bringSubviewToFront(backButtonView)
         }
         self.getVC()?.view.isHidden = false
         
@@ -1741,6 +1783,7 @@ extension WebAppController.Node {
     
     fileprivate func setBackButtonVisible(_ isVisible: Bool) {
         self.controller?.cancelButtonNode.setState(isVisible ? .back : .cancel, animated: true)
+        self.controller?.floatingBackButton?.isHidden = !(isVisible && (true == self.controller?.isFullScreenMod()))
         if true == self.controller?.useWeChatStyle {
             self.controller?.cancelButtonNode.isHidden = !isVisible
             if let webView = self.webAppWebView as? WebAppWebView {
@@ -1756,6 +1799,14 @@ extension WebAppController.Node {
         }
     }
     
+    fileprivate func isBackButtonVisible() -> Bool {
+        if let webView = self.webAppWebView as? WebAppWebView {
+            return webView.backButtonVisible == true
+        }
+        
+        return false
+    }
+    
     fileprivate func requestSetExpandBehavior(_ enalbe: Bool, delay: Double? = nil) {
         if !enalbe {
             self.requestExpansion(delay)
@@ -1767,9 +1818,11 @@ extension WebAppController.Node {
         if true == self.controller?.isFullScreenMod() || true == self.controller?.isCustomNavitationStyle() {
             self.controller?.floatingToolBar?.isHidden = !show
             self.controller?.navigationBar?.isHidden = true
+            self.controller?.floatingBackButton?.isHidden = !(show && self.isBackButtonVisible())
         } else {
             self.controller?.floatingToolBar?.isHidden = true
             self.controller?.navigationBar?.isHidden = !show
+            self.controller?.floatingBackButton?.isHidden = true
         }
         self.requestLayout()
     }
@@ -1777,6 +1830,10 @@ extension WebAppController.Node {
     fileprivate func requestShowFullScreen(_ show: Bool) {
 
         requestshowActionBar(self.showActionBar)
+        
+        if let toolBar = self.controller?.floatingToolBar as? ToolBarComponent {
+            toolBar.setFullscreen(isFullScreen: show)
+        }
         
         if show || true == self.controller?.isContainerExpanded() {
             self.controller?.requestFullScreen(show)

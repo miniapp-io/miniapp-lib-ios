@@ -12,11 +12,9 @@ import MiniAppUIKit
 internal class ToolBarComponent : UIView {
     
     private let cornerRadius: CGFloat = 15.0
-    private let isDark: Bool = false
+    private var isFullScreen: Bool = false
     
-    private let loadingIndicator = UIButton()
-    private let ratingLabel = UILabel()
-    private let starImageView = UIImageView()
+    private let shareButton = UIButton()
     private let closeButton = UIButton()
     private let minisizeButton = UIButton()
     private let verticalLine1 = CALayer()
@@ -29,16 +27,18 @@ internal class ToolBarComponent : UIView {
     private let btnHeight = 30.0
     private let btnMargin = 5.0
     
-    public func setStarLabel(label:String) {
-        self.isLoading = false
-        ratingLabel.text = label
+    public func setFullscreen(isFullScreen:Bool) {
+        if self.isFullScreen == isFullScreen {
+            return
+        }
+        self.isFullScreen = isFullScreen
         self.updateUI()
     }
     
-    var isLoading: Bool = true {
-        didSet {
-            updateUI()
-        }
+    public init(frame: CGRect, isFullScreen: Bool) {
+        super.init(frame: frame)
+        self.isFullScreen = isFullScreen
+        setupUI()
     }
     
     override init(frame: CGRect) {
@@ -69,46 +69,51 @@ internal class ToolBarComponent : UIView {
     
     private func setupUI() {
         
-        backgroundColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_BG_COLOR).withAlphaComponent(0.8)
+        let bgColor: UIColor
+        if isFullScreen {
+            bgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_BG_COLOR, isDark: true)
+        } else {
+            bgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_BG_COLOR)
+        }
+        
+        let fgColor: UIColor
+        if isFullScreen {
+            fgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR, isDark: true)
+        } else {
+            fgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR)
+        }
+        
+        backgroundColor = bgColor.withAlphaComponent(0.3)
         layer.cornerRadius = cornerRadius
         layer.borderWidth = 0.5
-        layer.borderColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR).withAlphaComponent(0.2).cgColor
+        layer.borderColor = fgColor.withAlphaComponent(0.2).cgColor
         layer.masksToBounds = true
         
-        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
-        loadingIndicator.setImage(getImage(named: "icon_share"), for: .normal)
-        loadingIndicator.imageEdgeInsets = UIEdgeInsets(top: btnMargin, left: btnMargin, bottom: btnMargin, right: btnMargin)
-        loadingIndicator.tintColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR)
-        
-        loadingIndicator.addTarget(self, action: #selector(sharePressed), for: .touchUpInside)
-        
-        ratingLabel.translatesAutoresizingMaskIntoConstraints = false
-        ratingLabel.font = UIFont.systemFont(ofSize: 15)
-        ratingLabel.textColor = .white
-        
-        starImageView.translatesAutoresizingMaskIntoConstraints = false
-        starImageView.image = getImage(named: "icon_star")
-        starImageView.tintColor = .yellow
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
+        shareButton.setImage(getImage(named: "icon_share"), for: .normal)
+        shareButton.imageEdgeInsets = UIEdgeInsets(top: btnMargin, left: btnMargin, bottom: btnMargin, right: btnMargin)
+        shareButton.tintColor = fgColor
+        shareButton.addTarget(self, action: #selector(sharePressed), for: .touchUpInside)
         
         minisizeButton.translatesAutoresizingMaskIntoConstraints = false
         minisizeButton.setImage(getImage(named: "icon_minimization"), for: .normal)
         minisizeButton.imageEdgeInsets = UIEdgeInsets(top: btnMargin, left: btnMargin, bottom: btnMargin, right: btnMargin)
-        minisizeButton.tintColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR)
+        minisizeButton.tintColor = fgColor
         minisizeButton.addTarget(self, action: #selector(minisizePressed), for: .touchUpInside)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(getImage(named: "icon_close"), for: .normal)
         closeButton.imageEdgeInsets = UIEdgeInsets(top: btnMargin, left: btnMargin, bottom: btnMargin, right: btnMargin)
-        closeButton.tintColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR)
+        closeButton.tintColor = fgColor
         closeButton.addTarget(self, action: #selector(closePressed), for: .touchUpInside)
         
-        verticalLine1.backgroundColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR).withAlphaComponent(0.2).cgColor
+        verticalLine1.backgroundColor = fgColor.withAlphaComponent(0.2).cgColor
         layer.addSublayer(verticalLine1)
         
-        verticalLine2.backgroundColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR).withAlphaComponent(0.2).cgColor
+        verticalLine2.backgroundColor = fgColor.withAlphaComponent(0.2).cgColor
         layer.addSublayer(verticalLine2)
         
-        let stackView = UIStackView(arrangedSubviews: [loadingIndicator, minisizeButton, closeButton])
+        let stackView = UIStackView(arrangedSubviews: [shareButton, minisizeButton, closeButton])
         stackView.axis = .horizontal
         stackView.distribution = .equalSpacing // Ensure equal spacing between each view
         stackView.alignment = .center
@@ -120,15 +125,13 @@ internal class ToolBarComponent : UIView {
             stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: btnMargin),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -btnMargin),
-            loadingIndicator.widthAnchor.constraint(equalToConstant: btnHeight),
-            loadingIndicator.heightAnchor.constraint(equalToConstant: btnHeight),
+            shareButton.widthAnchor.constraint(equalToConstant: btnHeight),
+            shareButton.heightAnchor.constraint(equalToConstant: btnHeight),
             minisizeButton.widthAnchor.constraint(equalToConstant: btnHeight),
             minisizeButton.heightAnchor.constraint(equalToConstant: btnHeight),
             closeButton.widthAnchor.constraint(equalToConstant: btnHeight),
             closeButton.heightAnchor.constraint(equalToConstant: btnHeight)
         ])
-        
-        updateUI()
     }
     
     override func layoutSubviews() {
@@ -141,14 +144,26 @@ internal class ToolBarComponent : UIView {
     }
     
     private func updateUI() {
-        if isLoading {
-            loadingIndicator.isHidden = false
-            ratingLabel.isHidden = true
-            starImageView.isHidden = true
+        let bgColor: UIColor
+        if isFullScreen {
+            bgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_BG_COLOR, isDark: true)
         } else {
-            loadingIndicator.isHidden = true
-            ratingLabel.isHidden = false
-            starImageView.isHidden = false
+            bgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_BG_COLOR)
         }
+        
+        let fgColor: UIColor
+        if isFullScreen {
+            fgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR, isDark: true)
+        } else {
+            fgColor = MiniAppServiceImpl.instance.resourceProvider.getColor(key: KEY_TEXT_COLOR)
+        }
+        
+        backgroundColor = bgColor.withAlphaComponent(0.3)
+        layer.borderColor = fgColor.withAlphaComponent(0.2).cgColor
+        shareButton.tintColor = fgColor
+        minisizeButton.tintColor = fgColor
+        closeButton.tintColor = fgColor
+        verticalLine1.backgroundColor = fgColor.withAlphaComponent(0.2).cgColor
+        verticalLine2.backgroundColor = fgColor.withAlphaComponent(0.2).cgColor
     }
 }

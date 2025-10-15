@@ -16,5 +16,7 @@ public protocol IResourceProvider {
     
     func getColor(key: String) -> UIColor
     
+    func getColor(key: String, isDark: Bool) -> UIColor
+    
     func getUserInterfaceStyle() -> UIUserInterfaceStyle
 }

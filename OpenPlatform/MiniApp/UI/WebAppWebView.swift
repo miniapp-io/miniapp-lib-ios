@@ -25,17 +25,17 @@ private class WebViewTouchGestureRecognizer: UITapGestureRecognizer {
 private var defaultEventProxySource: (String) -> String = { webappName in 
     return "var \(webappName)WebviewProxyProto = function() {}; " +
     "\(webappName)WebviewProxyProto.prototype.postEvent = function(eventName, eventData) { " +
-    "window.webkit.messageHandlers.perform\(webappName)Action.postMessage({'eventName': eventName, 'eventData': eventData}); " +
+    "window.webkit.messageHandlers.performDefaultAction.postMessage({'eventName': eventName, 'eventData': eventData}); " +
     "}; " +
     "\(webappName)WebviewProxyProto.prototype.sayHello = function() { " +
-    "window.webkit.messageHandlers.perform\(webappName)Action.postMessage({'eventName': 'web_app_say_hello', 'eventData': ''}); " +
+    "window.webkit.messageHandlers.performDefaultAction.postMessage({'eventName': 'web_app_say_hello', 'eventData': ''}); " +
     "}; " +
     "var \(webappName)WebviewProxy = new \(webappName)WebviewProxyProto();"
 }
 
 private let tgEventProxySource = "var TelegramWebviewProxyProto = function() {}; " +
     "TelegramWebviewProxyProto.prototype.postEvent = function(eventName, eventData) { " +
-    "window.webkit.messageHandlers.performAction.postMessage({'eventName': eventName, 'eventData': eventData}); " +
+    "window.webkit.messageHandlers.performTgAction.postMessage({'eventName': eventName, 'eventData': eventData}); " +
     "}; " +
 "var TelegramWebviewProxy = new TelegramWebviewProxyProto();"
 
@@ -150,7 +150,7 @@ internal final class WebAppWebView: BaseWebView {
         contentController.addUserScript(telegramEventProxySource)
         contentController.add(WeakGameScriptMessageHandler { message in
             handleTelegramScriptMessageImpl?(message)
-        }, name: "performAction")
+        }, name: "performTgAction")
         
         let selectionScript = WKUserScript(source: selectionSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
         contentController.addUserScript(selectionScript)

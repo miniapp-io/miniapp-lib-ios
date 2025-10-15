@@ -69,6 +69,13 @@ internal class DefaultResourceProvider : IResourceProvider {
         return ThemeColors.allColors[key]?.0 ?? .black
     }
     
+    public func getColor(key: String, isDark: Bool) -> UIColor {
+        if(isDark) {
+            return ThemeColors.allColors[key]?.1 ?? .white
+        }
+        return ThemeColors.allColors[key]?.0 ?? .black
+    }
+    
     public func getUserInterfaceStyle() -> UIUserInterfaceStyle {
         return self.userInterfaceStyle
     }
