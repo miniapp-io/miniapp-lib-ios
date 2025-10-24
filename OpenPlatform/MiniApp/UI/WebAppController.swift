@@ -1749,8 +1749,10 @@ extension WebAppController.Node {
     private func responseContentSafeArea() {
         let useFullStyle = (true == self.controller?.isFullScreenMod() ||  true==self.controller?.isCustomNavitationStyle())
         if let webView = self.webAppWebView, let controller = self.controller {
-            let contentTopInset =  useFullStyle ? self.controller?.floatingToolBar?.frame.bottomLeft.y : 0
-            let contentInsetsData = "{top:\(contentTopInset), bottom:0.0, left:0.0, right:0.0}"
+            let useFullStyle = controller.isFullScreenMod() || controller.isCustomNavitationStyle()
+            let contentTopInset: CGFloat = useFullStyle ? (controller.floatingToolBar?.frame.bottomLeft.y ?? 0) : 0
+            let contentInsetsData = String(format: "{top:%.1f, bottom:%.1f, left:%.1f, right:%.1f}", contentTopInset, 0.0, 0.0, 0.0)
+            print("ResponseContentSafeArea \(contentInsetsData)")
             controller.controllerNode.sendEvent(name: "content_safe_area_changed", data: contentInsetsData)
         }
     }
