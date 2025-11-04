@@ -39,6 +39,7 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
     private let context: AccountContext
     private var miniAppDto: MiniAppDto? = nil
     private var webAppParameters: WebAppParameters
+    private var isOpenDappOnMainFrame: Bool = false
     private let threadId: Int64?
     private var mUrl: String? = nil
     
@@ -560,7 +561,11 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
 internal extension WebAppController {
     
     @objc private func cancelPressed() {
-        if self.webAppParameters.isDApp {
+        if self.webAppParameters.isDApp || self.isOpenDappOnMainFrame {
+            if self.isOpenDappOnMainFrame {
+                self.isOpenDappOnMainFrame = false
+                self.controllerNode.setBackButtonVisible(false)
+            }
             self.controllerNode.webAppWebView?.goBack()
             return
         }
@@ -1258,6 +1263,8 @@ extension WebAppController.Node {
     }
     
     func sendEvent(name: String, data: String?) {
+        let contentInsetsData = String(format: "{name:%@, data:%@}", name, data ?? "")
+        // print("+++++sendEvent \(contentInsetsData)")
         if let webView = _webAppWebView as? WebAppWebView {
             webView.sendEvent(name: name, data: data)
         }
@@ -2238,9 +2245,20 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
                 MiniAppServiceImpl.instance.openUrl(viewController: self.controller, url: url, webLaunchParams: self.controller?.webAppParameters)
                 decisionHandler(.cancel)
             } else {
+                if false == self.controller?.webAppParameters.isDApp && true == navigationAction.targetFrame?.isMainFrame {
+                    self.controller?.isOpenDappOnMainFrame = !self.isMainHost(url: redirectUri)
+                }
+                
                 decisionHandler(.allow)
             }
         }
+    }
+    
+    func isMainHost(url: URL) -> Bool {
+        guard let mainUrl = self.controller?.mUrl, let urlMain = URL(string: mainUrl),let mainHost = urlMain.host, let urlHost = url.host else {
+            return false
+        }
+        return mainHost == urlHost
     }
     
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
@@ -2319,7 +2337,7 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
         self.pageLoadingView?.hide()
         
         if webView.canGoBack {
-            if true == self.controller?.webAppParameters.isDApp {
+            if true == self.controller?.webAppParameters.isDApp || true == self.controller?.isOpenDappOnMainFrame {
                 self.setBackButtonVisible(true)
             }
         } else {
