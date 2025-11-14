@@ -620,6 +620,10 @@ internal struct WebAppParameters {
     }
     
     public func buildCacheKey() -> String? {
+        if true == self.miniAppDto?.options?.disableCache {
+            return nil
+        }
+        
         if self.isDApp {
             return self.url
         }
@@ -1810,6 +1814,9 @@ internal final class MiniAppServiceImpl : MiniAppService {
                 
             default:
                 if isMeLink(resoleveUrl, baseMePaths: _context!.mePaths) {
+                    if let uri = URL(string: url) {
+                        self.openInDefaultBrowser(url: uri)
+                    }
                     return nil
                 }
                 

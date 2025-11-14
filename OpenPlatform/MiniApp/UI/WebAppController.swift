@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import WebKit
 import MiniAppUIKit
+import CoreMotion
 
 internal final class WebAppController: ViewController, AttachmentContainable  {
     
@@ -214,6 +215,11 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
         private weak var controller: WebAppController?
         
         private var pageLoadingView: PageLoadingView? = nil
+        
+        private let motionManager = CMMotionManager()
+        private var isAccelerometerActive = false
+        private var isDeviceOrientationActive = false
+        private var isGyroscopeActive = false
         
         private var maskView: UIView? = nil
         private var popupWebView: WKWebView? = nil
@@ -1264,7 +1270,7 @@ extension WebAppController.Node {
     
     func sendEvent(name: String, data: String?) {
         let contentInsetsData = String(format: "{name:%@, data:%@}", name, data ?? "")
-        // print("+++++sendEvent \(contentInsetsData)")
+        print("+++++sendEvent \(contentInsetsData)")
         if let webView = _webAppWebView as? WebAppWebView {
             webView.sendEvent(name: name, data: data)
         }
@@ -1307,6 +1313,10 @@ extension WebAppController.Node {
     
     fileprivate func releaseRef() {
         if let webView = self.webAppWebView {
+            
+            let data: JSON = ["is_visible" : false]
+            self.sendEvent(name: "visibility_changed", data: data.toString())
+            
             self.controller?.webAppParameters.bridgeProvider?.onWebViewDestroy(webView)
             
             if let cacheKey = self.controller?.getCacheKey() {
@@ -1321,6 +1331,7 @@ extension WebAppController.Node {
         }
         
         self._webAppWebView?.evaluateJavaScript("document.querySelectorAll('audio, video').forEach(media => media.pause());", completionHandler: nil)
+        
         self._webAppWebView?.removeFromSuperview()
         self._webAppWebView?.isDismiss = true
         self.webAppWebView?.canGoBackObseve = nil
@@ -1411,6 +1422,26 @@ extension WebAppController.Node {
         self.loadPage()
     }
     
+    func setPageFinish() {
+        if let webView = self.webAppWebView {
+            
+            if webView.isPageLoaded {
+                return
+            }
+            
+            webView.alpha = 1.0
+            self.pageLoadingView?.hide()
+            
+            let data: JSON = ["is_visible" : true]
+            self.sendEvent(name: "visibility_changed", data: data.toString())
+            
+            
+            webView.isPageLoaded = true
+            
+            self.controller?.webAppParameters.bridgeProvider?.onWebPageLoaded(webView)
+        }
+    }
+    
     fileprivate func loadPage() {
         guard let controller = self.controller else {
             return
@@ -1438,7 +1469,8 @@ extension WebAppController.Node {
   
                     self.controller?.mUrl = url
                     
-                    webView.load(URLRequest(url: URL(string: url)!))
+                    self.loadUrl(url: url)
+                    
                 }
                 
                 self.showFullScreenIfNeeded()
@@ -1605,10 +1637,11 @@ extension WebAppController.Node {
                     webView.goToHomePage()
                     webView.load(request)
                 } else {
-                    self.webAppWebView?.isPageLoaded = true
-                    self.webAppWebView?.alpha = 1.0
-                    self.pageLoadingView?.hide()
-                    self.controller?.webAppParameters.bridgeProvider?.onWebPageLoaded(webView)
+                    self.setPageFinish()
+                    
+                    let data: JSON = ["is_visible" : true]
+                    self.sendEvent(name: "visibility_changed", data: data.toString())
+                    
                     webView.evaluateJavaScript("document.body.scrollHeight") { result, error in
                         if let height = result as? CGFloat {
                             if height < 0.1 {
@@ -2115,6 +2148,155 @@ extension WebAppController.Node {
         }
     }
     
+    fileprivate func setIsAccelerometerActive(_ isActive: Bool, refreshRate: Double? = nil) {
+        guard self.motionManager.isAccelerometerAvailable else {
+            let data: JSON = [
+                "error": "UNSUPPORTED"
+            ]
+            self.sendEvent(name: "accelerometer_failed", data: data.toString())
+            return
+        }
+        guard self.isAccelerometerActive != isActive else {
+            return
+        }
+        self.isAccelerometerActive = isActive
+        if isActive {
+            self.sendEvent(name: "accelerometer_started", data: nil)
+            
+            if let refreshRate {
+                self.motionManager.accelerometerUpdateInterval = refreshRate * 0.001
+            } else {
+                self.motionManager.accelerometerUpdateInterval = 1.0
+            }
+            self.motionManager.startAccelerometerUpdates(to: OperationQueue.main) { [weak self] accelerometerData, error in
+                guard let self, let accelerometerData else {
+                    return
+                }
+                let gravityConstant: Double = 9.81
+                let data: JSON = [
+                    "x": Double(accelerometerData.acceleration.x * gravityConstant),
+                    "y": Double(accelerometerData.acceleration.y * gravityConstant),
+                    "z": Double(accelerometerData.acceleration.z * gravityConstant)
+                ]
+                self.sendEvent(name: "accelerometer_changed", data: data.string)
+            }
+        } else {
+            if self.motionManager.isAccelerometerActive {
+                self.motionManager.stopAccelerometerUpdates()
+            }
+            self.sendEvent(name: "accelerometer_stopped", data: nil)
+        }
+    }
+    
+    fileprivate func setIsDeviceOrientationActive(_ isActive: Bool, refreshRate: Double? = nil, absolute: Bool = false) {
+        guard self.motionManager.isDeviceMotionAvailable else {
+            let data: JSON = [
+                "error": "UNSUPPORTED"
+            ]
+            self.sendEvent(name: "device_orientation_failed", data: data.string)
+            return
+        }
+        guard self.isDeviceOrientationActive != isActive else {
+            return
+        }
+        self.isDeviceOrientationActive = isActive
+        if isActive {
+            self.sendEvent(name: "device_orientation_started", data: nil)
+            
+            if let refreshRate {
+                self.motionManager.deviceMotionUpdateInterval = refreshRate * 0.001
+            } else {
+                self.motionManager.deviceMotionUpdateInterval = 1.0
+            }
+            
+            var effectiveIsAbsolute = false
+            let referenceFrame: CMAttitudeReferenceFrame
+            
+            if absolute && [.authorizedWhenInUse, .authorizedAlways].contains(CLLocationManager.authorizationStatus()) && CMMotionManager.availableAttitudeReferenceFrames().contains(.xTrueNorthZVertical) {
+                referenceFrame = .xTrueNorthZVertical
+                effectiveIsAbsolute = true
+            } else if absolute && CMMotionManager.availableAttitudeReferenceFrames().contains(.xMagneticNorthZVertical) {
+                referenceFrame = .xMagneticNorthZVertical
+                effectiveIsAbsolute = true
+            } else {
+                if CMMotionManager.availableAttitudeReferenceFrames().contains(.xArbitraryCorrectedZVertical) {
+                    referenceFrame = .xArbitraryCorrectedZVertical
+                } else {
+                    referenceFrame = .xArbitraryZVertical
+                }
+                effectiveIsAbsolute = false
+            }
+            self.motionManager.startDeviceMotionUpdates(using: referenceFrame, to: OperationQueue.main) { [weak self] motionData, error in
+                guard let self, let motionData else {
+                    return
+                }
+                var alpha: Double
+                if effectiveIsAbsolute {
+                    alpha = motionData.heading * .pi / 180.0
+                    if alpha > .pi {
+                        alpha -= 2.0 * .pi
+                    } else if alpha < -.pi {
+                        alpha += 2.0 * .pi
+                    }
+                } else {
+                    alpha = motionData.attitude.yaw
+                }
+                
+                let data: JSON = [
+                    "absolute": effectiveIsAbsolute,
+                    "alpha": Double(alpha),
+                    "beta": Double(motionData.attitude.pitch),
+                    "gamma": Double(motionData.attitude.roll)
+                ]
+                self.sendEvent(name: "device_orientation_changed", data: data.toString())
+            }
+        } else {
+            if self.motionManager.isDeviceMotionActive {
+                self.motionManager.stopDeviceMotionUpdates()
+            }
+            self.sendEvent(name: "device_orientation_stopped", data: nil)
+        }
+    }
+    
+    fileprivate func setIsGyroscopeActive(_ isActive: Bool, refreshRate: Double? = nil) {
+        guard self.motionManager.isGyroAvailable else {
+            let data: JSON = [
+                "error": "UNSUPPORTED"
+            ]
+            self.sendEvent(name: "gyroscope_failed", data: data.string)
+            return
+        }
+        guard self.isGyroscopeActive != isActive else {
+            return
+        }
+        self.isGyroscopeActive = isActive
+        if isActive {
+            self.sendEvent(name: "gyroscope_started", data: nil)
+            
+            if let refreshRate {
+                self.motionManager.gyroUpdateInterval = refreshRate * 0.001
+            } else {
+                self.motionManager.gyroUpdateInterval = 1.0
+            }
+            self.motionManager.startGyroUpdates(to: OperationQueue.main) { [weak self] gyroData, error in
+                guard let self, let gyroData else {
+                    return
+                }
+                let data: JSON = [
+                    "x": Double(gyroData.rotationRate.x),
+                    "y": Double(gyroData.rotationRate.y),
+                    "z": Double(gyroData.rotationRate.z)
+                ]
+                self.sendEvent(name: "gyroscope_changed", data: data.string)
+            }
+        } else {
+            if self.motionManager.isGyroActive {
+                self.motionManager.stopGyroUpdates()
+            }
+            self.sendEvent(name: "gyroscope_stopped", data: nil)
+        }
+    }
+    
     fileprivate func sendBiometryAuthResult(isAuthorized: Bool, tokenData: String?, isUpdate: Bool = false) {
         var data: [String: Any] = [:]
         
@@ -2349,10 +2531,7 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
             return
         }
         
-        if let webView = _webAppWebView {
-            webView.isPageLoaded = true
-            self.controller?.webAppParameters.bridgeProvider?.onWebPageLoaded(webView)
-        }
+        self.setPageFinish()
         
         if true == self.controller?.webAppParameters.isDApp {
             self.getWebMetaData { _ in
@@ -2848,6 +3027,39 @@ extension WebAppController.Node {
             
             case "web_app_check_home_screen":
                 self.checkHomeScreeen()
+            
+            case "web_app_toggle_orientation_lock":
+                if let json, let lock = json["locked"] as? Bool {
+                    controller.parentController()?.lockOrientation = lock
+                }
+            
+            case "web_app_start_accelerometer":
+                if let json {
+                    let refreshRate = json["refresh_rate"] as? Double
+                    self.setIsAccelerometerActive(true, refreshRate: refreshRate)
+                }
+            
+            case "web_app_stop_accelerometer":
+                self.setIsAccelerometerActive(false)
+                
+            case "web_app_start_gyroscope":
+            if let json {
+                let refreshRate = json["refresh_rate"] as? Double
+                self.setIsGyroscopeActive(true, refreshRate: refreshRate)
+            }
+                
+            case "web_app_stop_gyroscope":
+                self.setIsGyroscopeActive(false)
+                
+            case "web_app_start_device_orientation":
+                if let json {
+                    let refreshRate = json["refresh_rate"] as? Double
+                    let absolute = (json["need_absolute"] as? Bool) == true
+                    self.setIsDeviceOrientationActive(true, refreshRate: refreshRate, absolute: absolute)
+                }
+                
+            case "web_app_stop_device_orientation":
+                self.setIsDeviceOrientationActive(false)
             
             default:
                 break

@@ -378,11 +378,14 @@ public struct AppSettings: Codable {
     let allowVerticalSwipe: Bool?
     
     
+    let disableCache: Bool?
+    
     private enum CodingKeys: String, CodingKey {
         case viewStyle = "view_style"
         case navigationStyle = "navigation_style"
         case allowHorizontalSwipe = "allow_horizontal_swipe"
         case allowVerticalSwipe = "allow_vertical_swipe"
+        case disableCache = "disable_cache"
     }
 }
 
