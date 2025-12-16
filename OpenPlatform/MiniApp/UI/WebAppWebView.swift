@@ -77,9 +77,13 @@ disableFullscreenOnExistingVideos();
 
 const observer = new MutationObserver(handleMutations);
 
-observer.observe(document.body, {
-  childList: true,
-  subtree: true
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.body) {
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
 });
 
 function disconnectObserver() {

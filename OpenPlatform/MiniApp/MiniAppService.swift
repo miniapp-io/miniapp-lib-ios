@@ -624,6 +624,10 @@ internal struct WebAppParameters {
             return nil
         }
         
+        if !self.useCache {
+            return nil
+        }
+        
         if self.isDApp {
             return self.url
         }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'MiniAppX'
-  s.version          = '1.0.23'
+  s.version          = '1.0.24'
   s.summary          = 'MiniAppX is an iOS framework for Web3 MiniApp, supporting pluginization, authentication, Bot, MiniApp, and more.'
   s.description      = <<-DESC
     MiniAppX provides runtime support for Web3 MiniApp, including plugin management, authentication, Bot services, MiniApp services, etc., suitable for the iOS platform.
