@@ -1448,6 +1448,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                      url: url,
                                      isLaunchLink: config.isLaunchUrl,
                                      useModalStyle: config.useModalStyle,
+                                     useCache: config.useCache,
                                      peer: config.peer,
                                      startParams: config.startParams,
                                      params: config.params,
@@ -1493,6 +1494,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                      url: url,
                                      isLaunchLink: config.isLaunchUrl,
                                      autoExpand: config.autoExpand,
+                                     useCache: config.useCache,
                                      peer: config.peer,
                                      startParams: config.startParams,
                                      params: config.params,
@@ -1629,6 +1631,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                useModalStyle: Bool? = nil,
                                isSystem: Bool = false,
                                autoExpand: Bool = false,
+                               useCache: Bool = true,
                                peer: PeerParams? = nil,
                                startParams: String? = nil,
                                params: [String:String]? = nil,
@@ -1679,6 +1682,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                 .params(weakSelf.merge(urlParams, params))
                                 .useWeChatStyle(useWeChatStyle)
                                 .peer(peer)
+                                .useCache(useCache)
                                 .bridgeProvider(bridgeProvider)
                                 .getActionBarNode(getActionBarNode)
                                 .errorCallback(errorCallback)
@@ -1730,6 +1734,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                 .params(weakSelf.merge(urlParams, params))
                                 .useWeChatStyle(useWeChatStyle)
                                 .peer(peer)
+                                .useCache(useCache)
                                 .bridgeProvider(bridgeProvider)
                                 .getActionBarNode(getActionBarNode)
                                 .errorCallback(errorCallback)
@@ -1783,6 +1788,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                 .isDApp(true)
                                 .url(app.url)
                                 .isSystem(isSystem)
+                                .useCache(useCache)
                                 .useWeChatStyle(useWeChatStyle)
                                 .bridgeProvider(bridgeProvider)
                                 .getActionBarNode(getActionBarNode)
@@ -1831,6 +1837,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                     .useWeChatStyle(useWeChatStyle)
                     .useModalStyle(useModalStyle)
                     .peer(peer)
+                    .useCache(useCache)
                     .isDApp(!isLaunchLink)
                     .isSystem(isSystem)
                     .getActionBarNode(getActionBarNode)
