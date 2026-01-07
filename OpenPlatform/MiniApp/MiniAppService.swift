@@ -890,12 +890,21 @@ public protocol IAppDelegate {
     func switchInlineQuery(app: IMiniApp, query: String, types: [String]) async -> Bool
     
     /**
-     Share link or text.
+     Share link or text. Use shareLink instead
      
      - Parameters:
      - linkOrText: Link or text to share.
      */
     func shareLinkOrText(linkOrText: String)
+    
+    /**
+     Share link  and  text.
+     
+     - Parameters:
+        - link: Share link
+        - text: Sare text.
+    */
+    func shareLink(link: String?, text: String?)
     
     /**
      Check if current session supports and is authorized for sending message functionality.
@@ -1768,7 +1777,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                 }
                 
             case let .share(url, text, to):
-                self.appDelegate.shareLinkOrText(linkOrText: url ?? text ?? "")
+                self.appDelegate.shareLink(link: url, text: text)
                 return nil
                 
             case let .dapp(appId, querys):
