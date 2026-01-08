@@ -547,7 +547,7 @@ internal enum Source {
 
 internal struct WebAppParameters {
     let source: Source
-    let miniAppDto: MiniAppDto?
+    var miniAppDto: MiniAppDto?
     let dAppDto: DAppDto?
     let botId: String?
     var botName: String?

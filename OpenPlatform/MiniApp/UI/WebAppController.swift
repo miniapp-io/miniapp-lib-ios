@@ -1191,9 +1191,6 @@ extension WebAppController.Node {
             }
             
             if cacheWebView == nil {
-                if let cacheKey = controller.getCacheKey() {
-                    WebAppLruCache.put(key: cacheKey, webView: webView)
-                }
                 webView.alpha = 0.0
                 webView.cacheData = cacheData
             } else if webView.isPageLoaded {
@@ -1486,6 +1483,7 @@ extension WebAppController.Node {
                     return
                 }
                 weakSelf.pageLoadingView?.updateIconUrl(app?.iconUrl)
+                weakSelf.controller?.webAppParameters.miniAppDto = app
                 weakSelf.controller?.miniAppDto = app
                 weakSelf.controller?.webAppParameters.miniAppId = app?.id
                 weakSelf.controller?.webAppParameters.miniAppName = app?.identifier ?? ""
@@ -1621,6 +1619,10 @@ extension WebAppController.Node {
     
     func loadUrl(url: String) {
         if let webView = self.webAppWebView, let uri = URL(string: url) {
+            if let cacheKey = self.controller?.getCacheKey() {
+                WebAppLruCache.put(key: cacheKey, webView: webView)
+            }
+            
             let request = URLRequest(url: uri)
             let cacheUrl = webView.url
             if !isUseCacheWebView || cacheUrl == nil || !webView.isPageLoaded  {
