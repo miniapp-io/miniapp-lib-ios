@@ -838,6 +838,9 @@ internal extension WebAppController {
     }
     
     func isModalStyle() -> Bool {
+        if "modal" == self.webAppParameters.params?["viewStyle"] {
+            return true
+        }
         return self.webAppParameters.useModalStyle ?? (self.miniAppDto?.options?.viewStyle == "modal")
     }
     
@@ -868,7 +871,7 @@ internal extension WebAppController {
         
         return self.controllerNode.enalbeExpand
             ?? self.miniAppDto?.options?.allowVerticalSwipe
-            ?? (self.miniAppDto != nil) ? self.isModalStyle() : false
+            ?? self.isModalStyle()
     }
     
     func allowHorizontalSwipe() -> Bool {
