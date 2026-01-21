@@ -2352,6 +2352,43 @@ extension WebAppController.Node {
         
        guard let app = self.controller else { return }
         
+       let processInterceptor: (String) -> Bool = { method in
+            switch method {
+            case "share":
+                app.clickMenu(type: "SHARE")
+                return true
+                
+            case "reloadPage":
+                app.clickMenu(type: "RELOAD")
+                return true
+                
+            case "addToHomeScreen":
+                app.clickMenu(type: "SHORTCUT")
+                return true
+                
+            case "openFeedback":
+                app.clickMenu(type: "FEEDBACK")
+                return true
+                
+            case "openUserAgreement":
+                app.clickMenu(type: "TERMS")
+                return true
+                
+            case "openPrivacyPolicy":
+                app.clickMenu(type: "PRIVACY")
+                return true
+                
+            default:
+                return false
+            }
+        }
+        
+        if(processInterceptor(method)) {
+            let paramsString = "{req_id: \"\(requestId)\", result: \"success\"}"
+            self.sendEvent(name: "custom_method_invoked", data: paramsString)
+            return
+        }
+        
        let isDeal = MiniAppServiceImpl.instance.appDelegate.customMethodProvider(app, method, params) { [weak self] result in
             if let strongSelf = self {
                 let paramsString = "{req_id: \"\(requestId)\", result: \(result ?? "{}")}"

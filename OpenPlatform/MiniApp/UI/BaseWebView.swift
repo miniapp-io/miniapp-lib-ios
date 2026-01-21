@@ -119,24 +119,11 @@ function getOffset(el) {
 getOffset(document.activeElement).top;
 """
 
-fileprivate var bundleVersionStr: String = ""
+fileprivate var bundleVersionStr: String = "1.0.31"
 
 internal extension WKWebView {
     
-    private func getBundleVersion() {
-        if !bundleVersionStr.isEmpty {
-            return
-        }
-        if let version = Bundle(for: BaseWebView.self).infoDictionary?["CFBundleShortVersionString"] as? String {
-            bundleVersionStr = version
-        } else {
-            bundleVersionStr = "undefine"
-        }
-    }
-    
     func defaultUserAgent() -> String {
-        getBundleVersion()
-        
         return isIPhone() ? "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 MiniAppX IOS/\(bundleVersionStr)" : "Mozilla/5.0 (iPad; CPU OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 MiniAppX IOS/\(bundleVersionStr)"
     }
     
@@ -149,8 +136,6 @@ internal extension WKWebView {
     }
     
     func transformUserAgent(originalUserAgent: String) -> String {
-        
-        getBundleVersion()
         
         do {
             // Parse iOS version (iPhone OS 18_1)
