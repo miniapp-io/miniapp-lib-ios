@@ -297,7 +297,7 @@ internal class OpenServiceRepository : OpenServiceDatasource {
         return await sendRequest(request: request, withToken: withToken)
     }
     
-    func sendRequest<T: Decodable>(request: URLRequest, withToken: Bool, retryCount: Int = 1) async -> Result<T, ApiError> {
+    func sendRequest<T: Decodable>(request: URLRequest, withToken: Bool, retryCount: Int = 3) async -> Result<T, ApiError> {
         
         return await withCheckedContinuation { continuation in
             Task {

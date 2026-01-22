@@ -119,7 +119,7 @@ function getOffset(el) {
 getOffset(document.activeElement).top;
 """
 
-fileprivate var bundleVersionStr: String = "1.0.31"
+fileprivate var bundleVersionStr: String = "1.0.32"
 
 internal extension WKWebView {
     

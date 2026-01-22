@@ -63,10 +63,14 @@ internal class OpenPlatformPluginImpl : OpenPlatformPlugin {
     private let _aiService = AIServiceImpl.shared
     private var isRefreshing = false
     
-    private let _cacheKey = "__miniappx_openplatform_jwt"
+    private let _appJwtCacheKey = "__miniappx_openplatform_jwt"
     
     var isDev: Bool = false
     var apiHost: String? = nil
+    
+    // MARK: - SignIn
+    private var _verifier: String = ""
+    private var _idTokenProvider: (() async -> String?)? = nil
     
     override public func isVerified() -> Bool {
         return SessionProvider.shared.isAuth()
@@ -86,6 +90,91 @@ internal class OpenPlatformPluginImpl : OpenPlatformPlugin {
         return PluginName.openPlatform.rawValue
     }
     
+    // MARK: - Auth Process
+    private func authProcess(
+        token: String,
+        refreshTokenAction: (() -> Void)?,
+        complete: (() -> Void)?,
+        onVerifierSuccess: (() -> Void)?,
+        onVerifierFailure: ((Int, String?) -> Void)?
+    ) {
+        Task { [weak self] in
+            self?.isRefreshing = true
+            
+            guard let strongSelf = self else {
+                return
+            }
+            
+            let result = await OpenServiceRepository.shared.auth(verifier: strongSelf._verifier, idToken: token)
+            
+            switch result {
+            case .success(let dto):
+                SessionProvider.shared.token = SessionState(token: dto.accessToken.data(using: .utf8)!)
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2, execute: {
+                    onVerifierSuccess?()
+                })
+            case .failure(let apiErr):
+                switch apiErr {
+                case let .requestFailed(statusCode, message):
+                    if statusCode == 401 {
+                        refreshTokenAction?() ?? onVerifierFailure?(statusCode, message)
+                    } else {
+                        onVerifierFailure?(statusCode, message)
+                    }
+                default:
+                    onVerifierFailure?(404, "Unknown Network Err")
+                }
+            }
+            
+            if refreshTokenAction == nil {
+                strongSelf.isRefreshing = false
+                complete?()
+            }
+        }
+    }
+    
+    // MARK: - Get IdToken Process
+    private func getIdTokenProcess(
+        complete: (() -> Void)?,
+        onVerifierSuccess: (() -> Void)?,
+        onVerifierFailure: ((Int, String?) -> Void)?
+    ) {
+        guard let idTokenProvider = self._idTokenProvider else {
+            self.isRefreshing = false
+            return
+        }
+        
+        let cacheData: String? = loadCodableData(forKey: self._appJwtCacheKey)
+        if let cacheToken = cacheData {
+            print("MiniAppX: Use Jwt from cache!")
+            authProcess(token: cacheToken, refreshTokenAction: { [weak self] in
+                guard let strongSelf = self else { return }
+                saveCodableData(nil, forKey: strongSelf._appJwtCacheKey)
+                Task {
+                    if let token = await idTokenProvider() {
+                        saveCodableData(token, forKey: strongSelf._appJwtCacheKey)
+                        strongSelf.authProcess(token: token, refreshTokenAction: nil, complete: complete, onVerifierSuccess: onVerifierSuccess, onVerifierFailure: onVerifierFailure)
+                    } else {
+                        strongSelf.isRefreshing = false
+                        complete?()
+                    }
+                }
+            }, complete: complete, onVerifierSuccess: onVerifierSuccess, onVerifierFailure: onVerifierFailure)
+        } else {
+            Task { [weak self] in
+                guard let strongSelf = self else { return }
+                if let token = await idTokenProvider() {
+                    print("MiniAppX: Use Jwt from provider!")
+                    saveCodableData(token, forKey: strongSelf._appJwtCacheKey)
+                    strongSelf.authProcess(token: token, refreshTokenAction: nil, complete: complete, onVerifierSuccess: onVerifierSuccess, onVerifierFailure: onVerifierFailure)
+                } else {
+                    strongSelf.isRefreshing = false
+                }
+            }
+        }
+    }
+    
+    // MARK: - SignIn
     override public func signIn(verifier: String,
                                 isDev: Bool,
                                 apiHost: String?,
@@ -95,109 +184,44 @@ internal class OpenPlatformPluginImpl : OpenPlatformPlugin {
         
         self.isDev = isDev
         self.apiHost = apiHost
+        self._verifier = verifier
+        self._idTokenProvider = idTokenProvider
         
-        let verifierProcess: (String, (() -> Void)?, (() -> Void)?) -> Void = { token, refreshToken, complete in
-            Task { [weak self] in
-                
-                self?.isRefreshing = true
-
-                let result = await OpenServiceRepository.shared.auth(verifier: verifier, idToken: token)
-                
-                guard let strongSelf = self else {
-                    return
-                }
-                
-                switch result {
-                case .success(let dto):
-                    SessionProvider.shared.token = SessionState(token: dto.accessToken.data(using: .utf8)!)
-                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2, execute: {
-                        onVerifierSuccess()
-                    })
-                case .failure(let apiErr):
-                    switch apiErr {
-                    case let .requestFailed(statusCode, message):
-                        if statusCode == 401 {
-                            refreshToken?() ?? onVerifierFailure(statusCode, message)
-                        } else {
-                            onVerifierFailure(statusCode, message)
-                        }
-                    default:
-                        onVerifierFailure(404, "Unknown Network Err")
-                    }
-                }
-                
-                strongSelf.isRefreshing = false
-                
-                complete?()
-            }
-        }
+        saveCodableData(nil, forKey: self._appJwtCacheKey)
         
-        let idTokenProcess : (@escaping (String,(() -> Void)?,(() -> Void)?) -> Void, (() -> Void)?) -> Void = { [weak self] nextStep, complete in
-            guard let strongSelf = self else {
-                self?.isRefreshing = false
-                return
+        SessionProvider.shared.refreshToken = { [weak self] in
+            guard let weakSelf = self else {
+                return SessionProvider.shared.token
             }
-            var cacheData:String? = loadCodableData(forKey: strongSelf._cacheKey)
-            if let cacheToken = cacheData {
-                print("MiniAppX: Use Jwt from cache!")
-                nextStep(cacheToken, {
-                    saveCodableData(nil, forKey: strongSelf._cacheKey)
-                    Task {
-                        if let token = await idTokenProvider() {
-                            nextStep(token, nil, complete)
-                            saveCodableData(token, forKey: strongSelf._cacheKey)
-                        } else {
-                            self?.isRefreshing = false
-                        }
-                    }
-                }, complete)
+            if weakSelf.isRefreshing && SessionProvider.shared.token == nil {
+                while weakSelf.isRefreshing && SessionProvider.shared.token == nil {
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                }
+                return SessionProvider.shared.token
             } else {
-                Task {
-                    if let token = await idTokenProvider() {
-                        print("MiniAppX: Use Jwt fome provider!")
-                        nextStep(token, nil, complete)
-                        saveCodableData(token, forKey: strongSelf._cacheKey)
-                    } else {
-                        self?.isRefreshing = false
-                    }
+                weakSelf.isRefreshing = true
+                saveCodableData(nil, forKey: weakSelf._appJwtCacheKey)
+                return await withCheckedContinuation { continuation in
+                    weakSelf.getIdTokenProcess(
+                        complete: { continuation.resume(returning: SessionProvider.shared.token) },
+                        onVerifierSuccess: nil,
+                        onVerifierFailure: nil
+                    )
                 }
             }
         }
         
-        if SessionProvider.shared.refreshToken == nil {
-            SessionProvider.shared.refreshToken = { [weak self] in
-                guard let weakSelf = self else {
-                    return SessionProvider.shared.token
-                }
-                if weakSelf.isRefreshing && SessionProvider.shared.token == nil {
-                    while weakSelf.isRefreshing && SessionProvider.shared.token == nil {
-                        try? await Task.sleep(nanoseconds: 300_000_000)
-                    }
-                    return SessionProvider.shared.token
-                } else {
-                    weakSelf.isRefreshing = true
-                    saveCodableData(nil, forKey: weakSelf._cacheKey)
-                    return await withCheckedContinuation { continuation in
-                        idTokenProcess(verifierProcess) {
-                            continuation.resume(returning: SessionProvider.shared.token)
-                        }
-                    }
-                }
-            }
-        }
-        
-        if SessionProvider.shared.isAuth() {
-            onVerifierSuccess()
-            return
-        }
-        
-        idTokenProcess(verifierProcess, nil)
-        
+        getIdTokenProcess(
+            complete: nil,
+            onVerifierSuccess: onVerifierSuccess,
+            onVerifierFailure: onVerifierFailure
+        )
     }
     
     override public func signOut() -> Void {
+        SessionProvider.shared.refreshToken = nil
         SessionProvider.shared.token = nil
-        saveCodableData(nil, forKey: self._cacheKey)
+        saveCodableData(nil, forKey: self._appJwtCacheKey)
         WebAppLruCache.removeAll()
         print("MiniAppX: signOut invoke!")
     }

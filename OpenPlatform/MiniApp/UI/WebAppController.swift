@@ -262,6 +262,10 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
         
         private var progressObserver: NSKeyValueObservation?
         
+        private var isPendingBlankNavigation = false
+        private var pendingBlankURL: URL?
+        private var pendingBlankNavigationTime: Date?
+        
         init(context: AccountContext, controller: WebAppController) {
             self.context = context
             self.controller = controller
@@ -570,7 +574,7 @@ internal extension WebAppController {
         if self.webAppParameters.isDApp || self.isOpenDappOnMainFrame {
             if self.isOpenDappOnMainFrame {
                 self.isOpenDappOnMainFrame = false
-                self.controllerNode.setBackButtonVisible(false)
+                // self.controllerNode.setBackButtonVisible(false)
             }
             self.controllerNode.webAppWebView?.goBack()
             return
@@ -2446,7 +2450,29 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
         }
     
         guard let redirectUri = navigationAction.request.url else {
-            decisionHandler(.allow)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        //
+        let isFromBlankNavigation: Bool = {
+            guard isPendingBlankNavigation,
+                  let pendingURL = pendingBlankURL,
+                  let pendingTime = pendingBlankNavigationTime else {
+                return false
+            }
+            let timeInterval = Date().timeIntervalSince(pendingTime)
+            let isSameURL = pendingURL == redirectUri
+            let isWithinTimeLimit = timeInterval < 1.0
+            return isSameURL && isWithinTimeLimit
+        }()
+        
+        // 
+        if isFromBlankNavigation {
+            isPendingBlankNavigation = false
+            pendingBlankURL = nil
+            pendingBlankNavigationTime = nil
+            decisionHandler(.cancel)
             return
         }
         
@@ -2487,6 +2513,10 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
     
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         
+        self.isPendingBlankNavigation = true
+        self.pendingBlankURL = navigationAction.request.url
+        self.pendingBlankNavigationTime = Date()
+
         if let uIDelegate =  self.getUIDelegateByProvider() {
             return uIDelegate.webView?(webView, createWebViewWith: configuration, for: navigationAction, windowFeatures: windowFeatures)
         }
@@ -2537,8 +2567,10 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
             return popupWebView
         }
         
-        if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
-           MiniAppServiceImpl.instance.openInDefaultBrowser(url: url)
+        if navigationAction.targetFrame == nil {
+            if let url = navigationAction.request.url {
+               MiniAppServiceImpl.instance.openInDefaultBrowser(url: url)
+            }
         }
         
         return nil

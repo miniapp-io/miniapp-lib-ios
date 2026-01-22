@@ -41,7 +41,7 @@ internal class SessionProvider {
     }
     
     func isAuth() -> Bool {
-        return _token?.token != nil
+        return _token?.token != nil && false == _token?.token.isEmpty
     }
     
     private func load() {
