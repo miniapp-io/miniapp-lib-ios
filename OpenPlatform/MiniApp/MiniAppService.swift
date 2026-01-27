@@ -2114,7 +2114,7 @@ extension MiniAppServiceImpl: WKNavigationDelegate, WKUIDelegate {
     
             // This method determines whether to allow navigation actions for requests (e.g., clicking links)
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        print("Navigating to URL: \(navigationAction.request.url?.absoluteString ?? "Unknown URL")")
+        // print("Navigating to URL: \(navigationAction.request.url?.absoluteString ?? "Unknown URL")")
         
         // You can make conditional judgments based on the request URL to decide whether to allow access to that URL
         if let url = navigationAction.request.url, url.absoluteString.contains("somecondition") {

@@ -34,8 +34,6 @@ internal class SessionProvider {
         }
     }
     
-    var refreshToken: (() async -> SessionState?)? = nil
-    
     private init() {
         load()
     }

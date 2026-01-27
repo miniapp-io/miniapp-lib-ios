@@ -353,7 +353,7 @@ internal class OpenServiceRepository : OpenServiceDatasource {
                     // Check HTTP status code
                     if httpResponse.statusCode == 401 && withToken {
                         SessionProvider.shared.token = nil
-                        if retryCount > 0, let refreshToken = SessionProvider.shared.refreshToken, let _ = try await refreshToken() {
+                        if retryCount > 0, let _ = await AuthManager.shared.refreshToken() {
                             return continuation.resume(returning: await sendRequest(request: request, withToken: withToken, retryCount: retryCount - 1))
                         }
                     }
