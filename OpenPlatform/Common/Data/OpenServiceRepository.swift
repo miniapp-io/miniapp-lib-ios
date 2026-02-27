@@ -32,25 +32,34 @@ protocol OpenServiceDatasource {
     
     func getAICompleteData(params: AICompleteParams) async -> Result<LaunchMiniAppDto, ApiError>
     
+    func generateShareLink(params: [String: String?]) async -> Result<AppInviteDto, ApiError>
+    
+    func getAppInfoByInviteCode(inviteCode: String) async -> Result<AppShareInfoResp, ApiError>
 }
 
 internal class OpenServiceRepository : OpenServiceDatasource {
     
     static let shared: OpenServiceDatasource  = OpenServiceRepository()
     
-    let PATH_AUTH = "/api/v1/users/auth"
-    let PATH_COMPLETE =  "/api/v1/ai/complete"
+    private let PATH_AUTH = "/api/v1/users/auth"
+    private let PATH_COMPLETE =  "/api/v1/ai/complete"
     
-    let PATH_BOT =  "/api/v1/bots"
-    let PATH_BOT_INLINE_BUTTON_CALLBACK =  "/api/v1/callback/query"
+    private let PATH_BOT =  "/api/v1/bots"
+    private let PATH_BOT_INLINE_BUTTON_CALLBACK =  "/api/v1/callback/query"
     
-    let PATH_MINIAPP = "/api/v1/miniapps"
-    let PATH_DAPP = "/api/v1/dapps"
+    private let PATH_MINIAPP = "/api/v1/miniapps"
+    private let PATH_DAPP = "/api/v1/dapps"
     
-    let PATH_MENU = "/api/v1/menus"
+    private let PATH_MENU = "/api/v1/menus"
     
-    let PATH_CUSTOM_METHOD =  "/api/v1/custom_methods/invoke"
-    let PATH_WEBPAGE_110 = "/api/v1/webpage/open"
+    private let PATH_CUSTOM_METHOD =  "/api/v1/custom_methods/invoke"
+    private let PATH_WEBPAGE_110 = "/api/v1/webpage/open"
+    
+    // get share invite short url
+    private let PATH_SHARE_INVITE = "/api/v1/miniapp/share/invite"
+
+    // get app info by share invite code
+    private let PATH_APP_INFO_BY_INVITE_CODE = "/api/v1/miniapp/share/invite/"
     
     private init() {}
     
@@ -228,6 +237,18 @@ internal class OpenServiceRepository : OpenServiceDatasource {
         let path = PATH_BOT_INLINE_BUTTON_CALLBACK
         
         return await sendPostRequest(path: path, params: params)
+    }
+    
+    func generateShareLink(params: [String: String?]) async -> Result<AppInviteDto, ApiError>  {
+        let path = PATH_SHARE_INVITE
+        
+        return await sendPostRequest(path: path, params: params)
+    }
+    
+    func getAppInfoByInviteCode(inviteCode: String) async -> Result<AppShareInfoResp, ApiError>  {
+        let path = "\(PATH_APP_INFO_BY_INVITE_CODE)/\(inviteCode)"
+        
+        return await sendGetRequest(path: path, params: nil)
     }
     
     func invokeCustomMethods(params: CustomMethodParams) async -> Result<CustomMethodResp, ApiError> {

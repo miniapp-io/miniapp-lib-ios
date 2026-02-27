@@ -2,7 +2,7 @@
 //  AuthManager.swift
 //  Pods
 //
-//  Created by Zhibiao Chen on 2026/1/27.
+//  Created by w3bili on 2026/1/27.
 //
 
 import Foundation
@@ -87,7 +87,6 @@ internal actor AuthManager {
                 switch apiErr {
                 case let .requestFailed(statusCode, message):
                     if statusCode == 401 && !forceRefresh {
-                        // 清理缓存并重试
                         saveCodableData(nil, forKey: _cacheKey)
                         try await authenticate(forceRefresh: true)
                     } else {
@@ -103,7 +102,6 @@ internal actor AuthManager {
     }
     
     func refreshToken() async -> String? {
-        // 如果有正在进行的刷新操作，等待它
         if isRefreshing, let existingTask = currentRefreshTask {
             return try? await existingTask.value
         }
@@ -120,10 +118,8 @@ internal actor AuthManager {
         let task = Task<String?, Error> { [weak self] in
             guard let self = self else { return nil }
             
-            // 清理缓存
             saveCodableData(nil, forKey: self._cacheKey)
             
-            // 获取新的 ID Token
             guard let token = await idTokenProvider() else {
                 return nil
             }
@@ -151,7 +147,6 @@ internal actor AuthManager {
             }
         }
         
-        // 保存当前刷新任务
         isRefreshing = true
         currentRefreshTask = task
         

@@ -3,7 +3,7 @@ import Foundation
 class JSON: ExpressibleByDictionaryLiteral {
     private var storage: [String: Any]
     
-    // MARK: - 初始化方法
+    // MARK: - init
     required init() {
         self.storage = [:]
     }
@@ -12,7 +12,6 @@ class JSON: ExpressibleByDictionaryLiteral {
         self.storage = dictionary
     }
     
-    // 实现 ExpressibleByDictionaryLiteral 协议
     required init(dictionaryLiteral elements: (String, Any)...) {
         self.storage = [:]
         for (key, value) in elements {
@@ -20,7 +19,7 @@ class JSON: ExpressibleByDictionaryLiteral {
         }
     }
     
-    // MARK: - 数据操作
+    // MARK: - set
     func set<T>(_ value: T, forKey key: String) {
         storage[key] = value
     }
@@ -49,7 +48,7 @@ class JSON: ExpressibleByDictionaryLiteral {
         return storage.count
     }
     
-    // MARK: - JSON 转换
+    // MARK: -
     var string: String? {
         return toString()
     }
@@ -79,7 +78,7 @@ class JSON: ExpressibleByDictionaryLiteral {
         return try? JSONSerialization.data(withJSONObject: storage, options: [])
     }
     
-    // MARK: - 静态方法
+    // MARK: - parse
     static func parse(_ jsonString: String) -> JSON? {
         guard let data = jsonString.data(using: .utf8) else {
             return nil
@@ -95,12 +94,12 @@ class JSON: ExpressibleByDictionaryLiteral {
                 return JSON(dictionary)
             }
         } catch {
-            print("JSON 解析失败: \(error)")
+            print("JSON parse fail: \(error)")
         }
         return nil
     }
     
-    // MARK: - 下标支持
+    // MARK: - []
     subscript(key: String) -> Any? {
         get { return storage[key] }
         set { storage[key] = newValue }

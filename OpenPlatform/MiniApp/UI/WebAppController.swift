@@ -1163,7 +1163,7 @@ extension WebAppController.Node {
             cacheWebView = WebAppLruCache.get(key: cacheKey) as? WebAppWebView
             
             let paramString = controller.webAppParameters.params?
-                .sorted(by: { $0.key < $1.key }) // 按键排序
+                .sorted(by: { $0.key < $1.key })
                 .map { key, value in
                     "\(key)_\(value)"
                 }
@@ -2354,9 +2354,9 @@ extension WebAppController.Node {
             return
         }
         
-       guard let app = self.controller else { return }
+        guard let app = self.controller else { return }
         
-       let processInterceptor: (String) -> Bool = { method in
+        let processInterceptor: (String) -> Bool = { method in
             switch method {
             case "share":
                 app.clickMenu(type: "SHARE")
@@ -2393,25 +2393,70 @@ extension WebAppController.Node {
             return
         }
         
-       let isDeal = MiniAppServiceImpl.instance.appDelegate.customMethodProvider(app, method, params) { [weak self] result in
-            if let strongSelf = self {
-                let paramsString = "{req_id: \"\(requestId)\", result: \(result ?? "{}")}"
-                strongSelf.sendEvent(name: "custom_method_invoked", data: paramsString)
-            }
-        }
-        if !isDeal, let appId = self.controller?.webAppParameters.miniAppId {
-            Task {
-                let result = await OpenServiceRepository.shared.invokeCustomMethods(params: CustomMethodParams(appId: appId, method: method, params: params))
-                DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else {
-                        return
+        Task {
+            
+            self.controller?.webAppParameters.miniAppId = "10"
+            
+            if let appId = self.controller?.webAppParameters.miniAppId {
+                
+                let (isDeal,result) = await MiniAppServiceImpl.instance.appDelegate.customMethodProvider(app, method, params)
+                if isDeal {
+                    let paramsString = "{req_id: \"\(requestId)\", result: \(result ?? "\"\"")}"
+                    self.sendEvent(name: "custom_method_invoked", data: paramsString)
+                    return
+                }
+                
+                
+                switch method {
+                case "generateShareLink":
+                    let jsonEvenData: [String: Any]?
+                    
+                    if !params.isEmpty {
+                        if let data = params.data(using: .utf8) {
+                            jsonEvenData = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                        } else {
+                            jsonEvenData = nil
+                        }
+                    } else {
+                        jsonEvenData = nil
                     }
-                    switch result {
-                    case .success(let data):
-                        let paramsString = "{req_id: \"\(requestId)\", result: \(data.result)}"
-                        weakSelf.sendEvent(name: "custom_method_invoked", data: paramsString)
-                    case .failure(_):
-                         return
+                    var shareParams: [String: String?] = [
+                        "app_id": appId
+                    ]
+                    if let jsonData = jsonEvenData {
+                        for (key, value) in jsonData {
+                            shareParams[key] = String(describing: value)
+                        }
+                    }
+                    let result = await OpenServiceRepository.shared.generateShareLink(params: shareParams)
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {
+                            return
+                        }
+                        switch result {
+                        case .success(let data):
+                            let jsonData = JSON()
+                            jsonData["req_id"] = requestId
+                            jsonData["result"] = data.toJSONString() ?? "\"\""
+                            weakSelf.sendEvent(name: "custom_method_invoked", data: jsonData.toString() ?? "")
+                        case .failure(_):
+                            return
+                        }
+                    }
+                    
+                default:
+                    let result = await OpenServiceRepository.shared.invokeCustomMethods(params: CustomMethodParams(appId: appId, method: method, params: params))
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {
+                            return
+                        }
+                        switch result {
+                        case .success(let data):
+                            let paramsString = "{req_id: \"\(requestId)\", result: \(data.result)}"
+                            weakSelf.sendEvent(name: "custom_method_invoked", data: paramsString)
+                        case .failure(_):
+                            return
+                        }
                     }
                 }
             }

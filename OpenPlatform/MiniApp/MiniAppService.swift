@@ -856,7 +856,7 @@ public protocol IAppDelegate {
      - params: Method parameters.
      - completion: Callback closure after method execution, returns execution result.
      */
-    var customMethodProvider: (IMiniApp, String, String?, @escaping (String?) -> Void) -> Bool { get }
+    var customMethodProvider: (IMiniApp, String, String?) async -> (Bool,String?) { get }
     
     /**
      Attachment action provider.
@@ -1176,6 +1176,10 @@ open class MiniAppService : NSObject {
         return .failure(.invalidResponse)
     }
     
+    open func getShareInfoByCode(code: String) async -> Result<AppShareInfoResp,ApiError>  {
+        return .failure(.invalidResponse)
+    }
+    
     open func setup(config: AppConfig, complete: @escaping () -> Void) -> Void {}
     
     open func updateTheme(userInterfaceStyle: UIUserInterfaceStyle) {}
@@ -1188,12 +1192,9 @@ open class MiniAppService : NSObject {
     
     open func setupInTestDelegate(appDelegate: IAppDelegate) {}
     
-    open func clearCache() {
-    }
+    open func clearCache() {}
     
-    open func dismissAll() {
-        
-    }
+    open func dismissAll() {}
 }
 
 internal final class MiniAppServiceImpl : MiniAppService {
@@ -1297,6 +1298,10 @@ internal final class MiniAppServiceImpl : MiniAppService {
     
     override func getDAppInfoById(dappId: String) async -> Result<DAppDto,ApiError> {
         return await OpenServiceRepository.shared.getDAppInfo(id: dappId)
+    }
+    
+    override func getShareInfoByCode(code: String) async -> Result<AppShareInfoResp,ApiError>  {
+       return  await OpenServiceRepository.shared.getAppInfoByInviteCode(inviteCode: code)
     }
     
     

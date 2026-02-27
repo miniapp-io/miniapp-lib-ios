@@ -474,6 +474,24 @@ public struct MiniAppResponse: Codable {
     }
 }
 
+public struct AppShareInfoResp: Codable {
+    public let shareInfo: [String: String?]
+    
+    enum CodingKeys: String, CodingKey {
+        case shareInfo = "share_info"
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        shareInfo = try container.decode([String: String?].self, forKey: .shareInfo)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(shareInfo, forKey: .shareInfo)
+    }
+}
+
 
 struct AICompleteParams: Codable {
     
@@ -520,5 +538,51 @@ struct CustomMethodResp: Codable {
     
     private enum CodingKeys: String, CodingKey {
         case result
+    }
+}
+
+
+internal struct AppInviteDto: Codable {
+    let shortUrl: String
+    
+    enum CodingKeys: String, CodingKey {
+        case shortUrl = "short_url"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        shortUrl = try container.decode(String.self, forKey: .shortUrl)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(shortUrl, forKey: .shortUrl)
+    }
+}
+
+extension AppInviteDto {
+    func toJSONString(options: JSONEncoder.OutputFormatting = []) -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = options
+        
+        if #available(iOS 13.0, *) {
+            encoder.outputFormatting.insert(.withoutEscapingSlashes)
+        }
+        
+        guard let data = try? encoder.encode(self),
+              let string = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        
+        return string
+    }
+    
+    func toDictionary() -> [String: Any]? {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self),
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return dict
     }
 }
