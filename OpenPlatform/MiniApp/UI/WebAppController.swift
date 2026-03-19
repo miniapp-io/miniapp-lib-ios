@@ -260,6 +260,17 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
         
         private var validLayout: (ContainerViewLayout, CGFloat)?
         
+        /// Fallback when `ContainerViewLayout.inputHeight` is missing but the keyboard overlaps the web view (e.g. standalone `present` pipeline gaps).
+        private var observedKeyboardOverlapBottom: CGFloat = 0
+        
+        /// Tracks last applied keyboard overlap for scroll / `keyboardJustAppeared` detection.
+        private var lastReportedEffectiveKeyboardBottom: CGFloat = 0
+        
+        /// Best-effort: layout `inputHeight` and/or keyboard frame observation.
+        fileprivate var isSoftKeyboardProbablyVisible: Bool {
+            max(observedKeyboardOverlapBottom, validLayout?.0.inputHeight ?? 0) > 44.0
+        }
+        
         private var progressObserver: NSKeyValueObservation?
         
         private var isPendingBlankNavigation = false
@@ -279,6 +290,7 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
         }
         
         deinit {
+            NotificationCenter.default.removeObserver(self)
             self.placeholderDisposable?.dispose()
             self.iconDisposable?.dispose()
             self.keepAliveDisposable?.dispose()
@@ -303,6 +315,38 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
             webView.scrollView.insertSubview(self.topOverscrollNode.view, at: 0)
             
             self.controller?.webAppParameters.bridgeProvider?.onWebViewCreated(webView, parentVC: self.controller!.getVC()!)
+            
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.handleKeyboardFrameWillChange(_:)),
+                name: UIResponder.keyboardWillChangeFrameNotification,
+                object: nil
+            )
+        }
+        
+        @objc private func handleKeyboardFrameWillChange(_ notification: Notification) {
+            guard let webView = self.webAppWebView, let window = webView.window else {
+                self.observedKeyboardOverlapBottom = 0
+                self.requestLayoutAfterKeyboardObservationChange()
+                return
+            }
+            guard let frameEnd = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+                self.observedKeyboardOverlapBottom = 0
+                self.requestLayoutAfterKeyboardObservationChange()
+                return
+            }
+            let keyboardInWindow = window.convert(frameEnd, from: nil)
+            let webFrameInWindow = webView.convert(webView.bounds, to: window)
+            let overlap = max(0, webFrameInWindow.maxY - keyboardInWindow.minY)
+            self.observedKeyboardOverlapBottom = overlap
+            self.requestLayoutAfterKeyboardObservationChange()
+        }
+        
+        private func requestLayoutAfterKeyboardObservationChange() {
+            guard let controller = self.controller else {
+                return
+            }
+            controller.requestLayout(transition: .immediate)
         }
         
         private func animateTransitionIn() {
@@ -332,12 +376,8 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
             }
         }
         
-        private var targetContentOffset: CGPoint?
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             self.updateNavigationBarAlpha(transition: .immediate)
-            if let targetContentOffset = self.targetContentOffset, scrollView.contentOffset != targetContentOffset {
-                scrollView.contentOffset = targetContentOffset
-            }
         }
         
         fileprivate func isContainerPanningUpdated(_ isPanning: Bool) {
@@ -386,11 +426,19 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
                     scrollInset.bottom = 0.0
                 }
                 
+                // WKWebView uses contentInsetAdjustmentBehavior = .never, so the system does not adjust scrollable area for the keyboard.
+                // Add keyboard overlap to contentInset.bottom (layout pipeline and/or local keyboard frame observation).
+                let effectiveKeyboardBottom = max(layout.inputHeight ?? 0.0, self.observedKeyboardOverlapBottom)
+                if effectiveKeyboardBottom > 44.0 {
+                    scrollInset.bottom += effectiveKeyboardBottom
+                }
+                
                 let frame = CGRect(origin: CGPoint(x: layout.safeInsets.left, y: headContainerHeight), size: CGSize(width: layout.size.width - layout.safeInsets.left - layout.safeInsets.right, height: max(1.0, layout.size.height - headContainerHeight - frameBottomInset)))
                 
                 var bottomInset = layout.intrinsicInsets.bottom + layout.additionalInsets.bottom
-                if let inputHeight = self.validLayout?.0.inputHeight, inputHeight > 44.0 {
-                    bottomInset = max(bottomInset, inputHeight)
+                let effKbForViewport = max(layout.inputHeight ?? 0.0, self.observedKeyboardOverlapBottom)
+                if effKbForViewport > 44.0 {
+                    bottomInset = max(bottomInset, effKbForViewport)
                 }
                 let viewportFrame = CGRect(origin: CGPoint(x: layout.safeInsets.left, y: headContainerHeight), size: CGSize(width: layout.size.width - layout.safeInsets.left - layout.safeInsets.right, height: max(1.0, layout.size.height - headContainerHeight - bottomInset)))
                 
@@ -399,21 +447,52 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
                     webView.scrollView.scrollIndicatorInsets = scrollInset
                 }
                 
-                if previousLayout != nil && (previousLayout?.inputHeight ?? 0.0).isZero, let inputHeight = layout.inputHeight, inputHeight > 44.0, transition.isAnimated {
-                    webView.scrollToActiveElement(layout: layout, completion: { [weak self] contentOffset in
-                        self?.targetContentOffset = contentOffset
-                    }, transition: transition)
-                    Queue.mainQueue().after(0.4, {
-                        if let inputHeight = self.validLayout?.0.inputHeight, inputHeight > 44.0 {
-                            transition.updateFrame(view: webView, frame: frame)
-                            Queue.mainQueue().after(0.1) {
-                                self.targetContentOffset = nil
+                let effectiveKb = max(layout.inputHeight ?? 0.0, self.observedKeyboardOverlapBottom)
+                let keyboardVisible = effectiveKb > 44.0
+                let prevReportedKb = self.lastReportedEffectiveKeyboardBottom
+                let keyboardJustAppeared = prevReportedKb <= 44.0 && keyboardVisible
+                let keyboardResized = prevReportedKb > 44.0 && keyboardVisible && abs(prevReportedKb - effectiveKb) > 12.0
+                let shouldScrollFocusedField = keyboardVisible && (keyboardJustAppeared || keyboardResized)
+                
+                if shouldScrollFocusedField {
+                    let scrollTransition: ContainedViewLayoutTransition = transition.isAnimated ? transition : .immediate
+                    webView.scrollToActiveElement(
+                        layout: layout,
+                        keyboardBottomObstruction: effectiveKb,
+                        completion: { _ in },
+                        transition: scrollTransition
+                    )
+                    if keyboardJustAppeared && transition.isAnimated {
+                        Queue.mainQueue().after(0.4, {
+                            if max(self.validLayout?.0.inputHeight ?? 0, self.observedKeyboardOverlapBottom) > 44.0 {
+                                transition.updateFrame(view: webView, frame: frame)
                             }
-                        }
-                    })
+                        })
+                    } else {
+                        transition.updateFrame(view: webView, frame: frame)
+                    }
+                    if keyboardJustAppeared {
+                        Queue.mainQueue().after(0.45, { [weak self] in
+                            guard let self, let (l, _) = self.validLayout else {
+                                return
+                            }
+                            let kb = max(l.inputHeight ?? 0, self.observedKeyboardOverlapBottom)
+                            guard kb > 44 else {
+                                return
+                            }
+                            self.webAppWebView?.scrollToActiveElement(
+                                layout: l,
+                                keyboardBottomObstruction: kb,
+                                completion: { _ in },
+                                transition: .immediate
+                            )
+                        })
+                    }
                 } else {
                     transition.updateFrame(view: webView, frame: frame)
                 }
+                
+                self.lastReportedEffectiveKeyboardBottom = effectiveKb
                 
                 var customInsets: UIEdgeInsets = .zero
                 if useFullStyle {
@@ -571,6 +650,12 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
 internal extension WebAppController {
     
     @objc private func cancelPressed() {
+        if self.controllerNode.isSoftKeyboardProbablyVisible {
+            self.view.endEditing(true)
+            self.controllerNode.webAppWebView?.endEditing(true)
+            return
+        }
+        
         if self.webAppParameters.isDApp || self.isOpenDappOnMainFrame {
             if self.isOpenDappOnMainFrame {
                 self.isOpenDappOnMainFrame = false

@@ -108,18 +108,28 @@ internal class BaseWebView: WKWebView {
 }
 
 
-private let findActiveElementY = """
-function getOffset(el) {
-    const rect = el.getBoundingClientRect();
-    return {
-        left: rect.left + window.scrollX,
-        top: rect.top + window.scrollY
-    };
-}
-getOffset(document.activeElement).top;
+/// Measures focused control after scrollIntoView; uses visualViewport when available (closer to visible area above keyboard in WKWebView).
+private let activeElementViewportRectJSON = """
+(function() {
+  var el = document.activeElement;
+  if (!el) return null;
+  var tag = el.tagName;
+  if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && !el.isContentEditable) return null;
+  if (tag === 'BODY' || tag === 'HTML') return null;
+  try {
+    el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+  } catch (e) {
+    try { el.scrollIntoView(true); } catch (e2) {}
+  }
+  var r = el.getBoundingClientRect();
+  var vv = window.visualViewport;
+  var vTop = vv ? vv.offsetTop : 0;
+  var vHeight = vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight || 0);
+  return JSON.stringify({ top: r.top, bottom: r.bottom, height: r.height, viewTop: vTop, viewHeight: vHeight });
+})()
 """
 
-fileprivate var bundleVersionStr: String = "1.0.34"
+fileprivate var bundleVersionStr: String = "1.0.35"
 
 internal extension WKWebView {
     
@@ -193,26 +203,57 @@ internal extension WKWebView {
         go(to: backList)
     }
     
-    func scrollToActiveElement(layout: ContainerViewLayout, completion: @escaping (CGPoint) -> Void, transition: ContainedViewLayoutTransition) {
-        self.evaluateJavaScript(findActiveElementY, completionHandler: { result, _ in
-            if let result = result as? CGFloat {
-                Queue.mainQueue().async {
-                    let convertedY = result - self.scrollView.contentOffset.y
-                    let viewportHeight = self.frame.height - (layout.inputHeight ?? 0.0) + 26.0
-                    if convertedY < 0.0 || (convertedY + 44.0) > viewportHeight {
-                        let targetOffset: CGFloat
-                        if convertedY < 0.0 {
-                            targetOffset = max(0.0, result - 36.0)
-                        } else {
-                            targetOffset = max(0.0, result + 60.0 - viewportHeight)
-                        }
-                        let contentOffset = CGPoint(x: 0.0, y: targetOffset)
-                        completion(contentOffset)
-                        transition.animateView({
-                            self.scrollView.contentOffset = contentOffset
-                        })
-                    }
+    /// Scrolls the focused input above the soft keyboard. Uses `keyboardBottomObstruction` when layout pipeline omits `inputHeight`.
+    func scrollToActiveElement(
+        layout: ContainerViewLayout,
+        keyboardBottomObstruction: CGFloat,
+        completion: @escaping (CGPoint) -> Void,
+        transition: ContainedViewLayoutTransition
+    ) {
+        self.evaluateJavaScript(activeElementViewportRectJSON, completionHandler: { result, _ in
+            guard let json = result as? String,
+                  let data = json.data(using: .utf8),
+                  let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let top = (obj["top"] as? NSNumber)?.doubleValue,
+                  let bottom = (obj["bottom"] as? NSNumber)?.doubleValue else {
+                return
+            }
+            let viewHeightJS = (obj["viewHeight"] as? NSNumber)?.doubleValue
+            let viewTopJS = (obj["viewTop"] as? NSNumber)?.doubleValue ?? 0.0
+            Queue.mainQueue().async {
+                let scrollView = self.scrollView
+                let insetBottom = Double(scrollView.contentInset.bottom)
+                let layoutKb = Double(layout.inputHeight ?? 0.0)
+                let obstruction = max(insetBottom, layoutKb, Double(keyboardBottomObstruction))
+                var visibleHeight = Double(scrollView.bounds.height) - obstruction
+                if let vh = viewHeightJS, vh > 80 {
+                    visibleHeight = min(visibleHeight, vh - viewTopJS)
                 }
+                guard visibleHeight > 80 else {
+                    return
+                }
+                let marginTop: Double = 8.0
+                let marginBottom: Double = 20.0
+                var deltaY: Double = 0.0
+                if bottom > visibleHeight - marginBottom {
+                    deltaY = bottom - (visibleHeight - marginBottom)
+                } else if top < marginTop {
+                    deltaY = top - marginTop
+                }
+                guard abs(deltaY) > 0.5 else {
+                    return
+                }
+                let curY = Double(scrollView.contentOffset.y)
+                var newY = curY + deltaY
+                let maxOffsetY = max(
+                    0.0,
+                    Double(scrollView.contentSize.height) - Double(scrollView.bounds.height) + insetBottom
+                )
+                newY = min(max(0.0, newY), maxOffsetY)
+                let contentOffset = CGPoint(x: scrollView.contentOffset.x, y: CGFloat(newY))
+                completion(contentOffset)
+                let animated = transition.isAnimated
+                scrollView.setContentOffset(contentOffset, animated: animated)
             }
         })
     }

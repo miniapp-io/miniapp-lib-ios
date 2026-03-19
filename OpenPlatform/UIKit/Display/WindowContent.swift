@@ -269,12 +269,12 @@ internal class Window1 {
     private var shouldInvalidateSupportedOrientations = false
     
     private var statusBarHidden = false
-        
+    
     private var shouldNotAnimateLikelyKeyboardAutocorrectionSwitch: Bool = false
     
     public private(set) var forceInCallStatusBarText: String? = nil
     public var inCallNavigate: (() -> Void)?
-
+    
     private var debugTapCounter: (Double, Int) = (0.0, 0)
     private var debugTapRecognizer: UITapGestureRecognizer?
     public var debugAction: (() -> Void)? {
@@ -298,15 +298,15 @@ internal class Window1 {
                 self.debugTapCounter.0 = timestamp
                 self.debugTapCounter.1 = 0
             }
-
+            
             if self.debugTapCounter.0 >= timestamp - 0.4 {
                 self.debugTapCounter.0 = timestamp
                 self.debugTapCounter.1 += 1
             }
-
+            
             if self.debugTapCounter.1 >= 10 {
                 self.debugTapCounter.1 = 0
-
+                
                 self.debugAction?()
             }
         }
@@ -322,6 +322,10 @@ internal class Window1 {
     private var keyboardTypeChangeTimer: SignalTimer?
     
     private var isInteractionBlocked = false
+    
+    /// For content presented via system `present` (e.g. standalone mini app) that is not wired as `viewController` / `NavigationController`, keyboard notifications update `WindowLayout` but do not reach the child.
+    /// When set, `updateLayout` commits immediately and forwards `childLayout` (including `inputHeight`) to this controller.
+    internal weak var standaloneModalLayoutTarget: ViewController?
     
     public func getContainedLayoutForWindowLayout() -> ContainerViewLayout {
         return containedLayoutForWindowLayout(self.windowLayout, deviceMetrics: self.deviceMetrics)
@@ -501,7 +505,7 @@ internal class Window1 {
                 if isTablet && keyboardFrame.isEmpty {
                     return
                 }
-                                
+                
                 if #available(iOSApplicationExtension 14.2, iOS 14.2, *), UIAccessibility.prefersCrossFadeTransitions {
                 } else if let keyboardView = strongSelf.statusBarHost?.keyboardView {
                     if keyboardFrame.width.isEqual(to: keyboardView.bounds.width) && keyboardFrame.height.isEqual(to: keyboardView.bounds.height) && keyboardFrame.minX.isEqual(to: keyboardView.frame.minX) {
@@ -513,11 +517,11 @@ internal class Window1 {
                 if #available(iOSApplicationExtension 16.1, iOS 16.1, *), let screen = notification.object as? UIScreen, let keyboardFrameEnd = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                     let fromCoordinateSpace = screen.coordinateSpace
                     let toCoordinateSpace: UICoordinateSpace = strongSelf.hostView.eventView
-
+                    
                     let convertedKeyboardFrameEnd = fromCoordinateSpace.convert(keyboardFrameEnd, to: toCoordinateSpace)
                     minKeyboardY = convertedKeyboardFrameEnd.minY
                 }
-
+                
                 var windowedHeightDifference: CGFloat = 0.0
                 
                 let screenHeight: CGFloat
@@ -536,8 +540,8 @@ internal class Window1 {
                     if strongSelf.windowLayout.size.height != screenSize.height {
                         let heightDelta = screenSize.height - strongSelf.windowLayout.size.height
                         //if heightDelta > 0.0 && heightDelta < 200.0 {
-                            isWindowed = true
-                            windowedHeightDifference = heightDelta / 2.0
+                        isWindowed = true
+                        windowedHeightDifference = heightDelta / 2.0
                         //}
                     }
                     
@@ -588,7 +592,7 @@ internal class Window1 {
                 if strongSelf.hostView.containerView is ChildWindowHostView, !isTablet {
                     keyboardHeight += 27.0
                 }
-                            
+                
                 var duration: Double = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0.0
                 if duration > Double.ulpOfOne {
                     duration = 0.5
@@ -672,7 +676,7 @@ internal class Window1 {
         self.hostView.containerView.addGestureRecognizer(recognizer)
         self.hostView.containerView.addSubview(self.badgeView)
     }
-            
+    
     public required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -781,7 +785,7 @@ internal class Window1 {
         if self.isInteractionBlocked {
             return nil
         }
-                
+        
         if let result = self.topPresentationContext.hitTest(view: self.hostView.containerView, point: point, with: event) {
             return result
         }
@@ -980,10 +984,10 @@ internal class Window1 {
             
             var resolvedOrientations: UIInterfaceOrientationMask
             switch self.windowLayout.metrics.widthClass {
-                case .regular:
-                    resolvedOrientations = supportedOrientations.regularSize
-                case .compact:
-                    resolvedOrientations = supportedOrientations.compactSize
+            case .regular:
+                resolvedOrientations = supportedOrientations.regularSize
+            case .compact:
+                resolvedOrientations = supportedOrientations.compactSize
             }
             if resolvedOrientations.isEmpty {
                 resolvedOrientations = [.portrait]
@@ -1019,10 +1023,10 @@ internal class Window1 {
                 
                 var resolvedOrientations: UIInterfaceOrientationMask
                 switch self.windowLayout.metrics.widthClass {
-                    case .regular:
-                        resolvedOrientations = supportedOrientations.regularSize
-                    case .compact:
-                        resolvedOrientations = supportedOrientations.compactSize
+                case .regular:
+                    resolvedOrientations = supportedOrientations.regularSize
+                case .compact:
+                    resolvedOrientations = supportedOrientations.compactSize
                 }
                 if resolvedOrientations.isEmpty {
                     resolvedOrientations = [.portrait]
@@ -1066,7 +1070,7 @@ internal class Window1 {
         self.presentationContext.updateToInterfaceOrientation(orientation)
         self.overlayPresentationContext.updateToInterfaceOrientation(orientation)
         
-         self.topPresentationContext.updateToInterfaceOrientation(orientation)
+        self.topPresentationContext.updateToInterfaceOrientation(orientation)
         
         for controller in self.topLevelOverlayControllers {
             controller.updateToInterfaceOrientation(orientation)
@@ -1083,11 +1087,19 @@ internal class Window1 {
             update(&updatingLayout)
             if updatingLayout.layout != self.windowLayout {
                 self.updatingLayout = updatingLayout
-                self.hostView.eventView.setNeedsLayout()
+                if self.standaloneModalLayoutTarget != nil {
+                    self.layoutSubviews(force: true)
+                } else {
+                    self.hostView.eventView.setNeedsLayout()
+                }
             }
         } else {
             update(&self.updatingLayout!)
-            self.hostView.eventView.setNeedsLayout()
+            if self.standaloneModalLayoutTarget != nil {
+                self.layoutSubviews(force: true)
+            } else {
+                self.hostView.eventView.setNeedsLayout()
+            }
         }
     }
     
@@ -1141,11 +1153,15 @@ internal class Window1 {
                         rootTransition.updateFrame(node: rootController.displayNode, frame: CGRect(origin: CGPoint(), size: self.windowLayout.size))
                         rootController.containerLayoutUpdated(rootLayout, transition: rootTransition)
                     }
+                    if let standaloneTarget = self.standaloneModalLayoutTarget {
+                        updatingLayout.transition.updateFrame(node: standaloneTarget.displayNode, frame: CGRect(origin: CGPoint(), size: self.windowLayout.size))
+                        standaloneTarget.containerLayoutUpdated(childLayout, transition: updatingLayout.transition)
+                    }
                     self.presentationContext.containerLayoutUpdated(childLayout, transition: updatingLayout.transition)
                     self.overlayPresentationContext.containerLayoutUpdated(childLayout, transition: updatingLayout.transition)
                     
                     self.topPresentationContext.containerLayoutUpdated(childLayout, transition: updatingLayout.transition)
-                
+                    
                     for controller in self.topLevelOverlayControllers {
                         updatingLayout.transition.updateFrame(node: controller.displayNode, frame: CGRect(origin: CGPoint(), size: self.windowLayout.size))
                         controller.containerLayoutUpdated(childLayout, transition: updatingLayout.transition)
@@ -1304,16 +1320,16 @@ internal class Window1 {
     
     @objc func panGesture(_ recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
-            case .began:
-                self.panGestureBegan(location: recognizer.location(in: recognizer.view))
-            case .changed:
-                self.panGestureMoved(location: recognizer.location(in: recognizer.view))
-            case .ended:
-                self.panGestureEnded(location: recognizer.location(in: recognizer.view), velocity: recognizer.velocity(in: recognizer.view))
-            case .cancelled:
-                self.panGestureEnded(location: recognizer.location(in: recognizer.view), velocity: nil)
-            default:
-                break
+        case .began:
+            self.panGestureBegan(location: recognizer.location(in: recognizer.view))
+        case .changed:
+            self.panGestureMoved(location: recognizer.location(in: recognizer.view))
+        case .ended:
+            self.panGestureEnded(location: recognizer.location(in: recognizer.view), velocity: recognizer.velocity(in: recognizer.view))
+        case .cancelled:
+            self.panGestureEnded(location: recognizer.location(in: recognizer.view), velocity: nil)
+        default:
+            break
         }
     }
     

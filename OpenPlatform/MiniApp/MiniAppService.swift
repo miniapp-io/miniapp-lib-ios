@@ -7,7 +7,13 @@
 import Foundation
 import UIKit
 import MiniAppUIKit
+import ObjectiveC
 @preconcurrency import WebKit
+
+/// Retains `Window1` strongly; otherwise `mainWindow` is released when `present` returns, keyboard updates never commit, and `inputHeight` never reaches `AttachmentController` / `WebAppController`.
+private enum MiniAppModalWindow1RetainKey {
+    static var key: UInt8 = 0
+}
 
 open class WebAppLaunchParameters {
     func isDev() -> Bool {
@@ -1908,8 +1914,17 @@ internal final class MiniAppServiceImpl : MiniAppService {
             
             let statusBarHost = ApplicationStatusBarHost()
             let mainWindow = Window1(hostView: hostView, statusBarHost: statusBarHost)
+            mainWindow.standaloneModalLayoutTarget = viewController
             
             let rootNavitationController = UINavigationController(rootViewController: viewController)
+            
+            // Retain Window1 for the modal's lifetime so keyboard observers stay alive until dismiss.
+            objc_setAssociatedObject(
+                rootNavitationController,
+                &MiniAppModalWindow1RetainKey.key,
+                mainWindow,
+                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+            )
             
             if isDialog {
                 rootNavitationController.modalPresentationStyle = .overCurrentContext

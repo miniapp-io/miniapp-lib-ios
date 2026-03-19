@@ -59,7 +59,7 @@ internal class OpenServiceRepository : OpenServiceDatasource {
     private let PATH_SHARE_INVITE = "/api/v1/miniapp/share/invite"
 
     // get app info by share invite code
-    private let PATH_APP_INFO_BY_INVITE_CODE = "/api/v1/miniapp/share/invite/"
+    private let PATH_APP_INFO_BY_INVITE_CODE = "/api/v1/miniapp/share/invite"
     
     private init() {}
     
