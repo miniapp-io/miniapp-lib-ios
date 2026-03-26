@@ -192,7 +192,7 @@ public class DAppLaunchParameters : WebAppLaunchParameters {
     let parentVC: UIViewController
     let id: String?
     let url: String?
-    
+    let useCache: Bool
     let bridgeProvider: BridgeProvider?
     
     let getActionBarNode: (@escaping () -> Void, @escaping () -> Void) -> (CGSize,UIView)?
@@ -206,6 +206,7 @@ public class DAppLaunchParameters : WebAppLaunchParameters {
         parentVC: UIViewController,
         id: String? = nil,
         url: String? = nil,
+        useCache: Bool = true,
         bridgeProvider: BridgeProvider? = nil,
         getActionBarNode: @escaping (@escaping () -> Void, @escaping () -> Void) -> (CGSize,UIView)? = { _,_ in return nil},
         completion: @escaping (IMiniApp) -> Void = { _ in },
@@ -216,6 +217,7 @@ public class DAppLaunchParameters : WebAppLaunchParameters {
         self.parentVC = parentVC
         self.id = id
         self.url = url
+        self.useCache = useCache
         self.bridgeProvider = bridgeProvider
         self.getActionBarNode = getActionBarNode
         
@@ -236,6 +238,7 @@ public class DAppLaunchParameters : WebAppLaunchParameters {
                 parentVC: parentVC!,
                 id: id,
                 url: url,
+                useCache: useCache,
                 bridgeProvider: bridgeProvider,
                 getActionBarNode: getActionBarNode,
                 completion: completion,
@@ -830,8 +833,8 @@ internal struct WebAppParameters {
 }
 
 public protocol IMiniApp: AnyObject {
-    func reloadPage() -> Void
-    func requestDismiss(_ force: Bool) -> Bool
+    func reloadPage(_ forece: Bool) -> Void
+    func requestDismiss(_ force: Bool, _ clearCach: Bool) -> Bool
     func getVC() -> UIViewController?
     func getShareUrl() async -> String?
     func getShareInfo() async -> ShareDto?
@@ -1198,6 +1201,8 @@ open class MiniAppService : NSObject {
     
     open func setupInTestDelegate(appDelegate: IAppDelegate) {}
     
+    open func getMiniAppByWebView(_ webView: WKWebView) -> IMiniApp? { return nil }
+    
     open func clearCache() {}
     
     open func dismissAll() {}
@@ -1271,9 +1276,17 @@ internal final class MiniAppServiceImpl : MiniAppService {
     override public func dismissAll() {
         FloatingWindowManager.shared.dismissFloatingWindow(force: true)
         for miniApp in _openMiniApps {
-            let _ = miniApp.requestDismiss(true)
+            let _ = miniApp.requestDismiss(true, false)
         }
         _openMiniApps.removeAll()
+    }
+    
+    override public func getMiniAppByWebView(_ webView: WKWebView) -> (any IMiniApp)? {
+        if webView is BaseWebView {
+            return (webView as? BaseWebView)?.miniApp
+        }
+        
+        return nil
     }
     
     public func inserMiniApp(_ miniApp: IMiniApp) {
@@ -1568,6 +1581,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                             let webParams = WebAppParameters.Builder()
                                 .url(dapp.url)
                                 .isDApp(true)
+                                .useCache(config.useCache)
                                 .autoExpand(true)
                                 .dAppDto(dapp)
                                 .errorCallback(config.errorCallback)
@@ -1600,6 +1614,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                 .url(config.url)
                 .isDApp(true)
                 .autoExpand(true)
+                .useCache(config.useCache)
                 .getActionBarNode(config.getActionBarNode)
                 .errorCallback(config.errorCallback)
                 .bridgeProvider(config.bridgeProvider ?? self.appConfig?.bridgeProviderFactory?.buildBridgeProvider(id: config.id, type: self.WEBPAGE, url: config.url))

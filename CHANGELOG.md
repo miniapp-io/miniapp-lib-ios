@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.36
+
+- Add `getMiniAppByWebView` method to MiniAppService
+- Update IMiniApp protocol: add force parameter to reloadPage
+- Update IMiniApp protocol: add clearCache parameter to requestDismiss
+
 ## 1.0.35
 
 - Keep `Window1` alive for standalone `present` and forward keyboard layout to the mini-app (`standaloneModalLayoutTarget` + associated object on the modal nav controller).

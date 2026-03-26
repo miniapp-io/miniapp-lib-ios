@@ -203,7 +203,7 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
         self.rootNV = nil
         self.rootVC = nil
         
-        self.controllerNode.releaseRef()
+        self.controllerNode.releaseRef(false)
         
         super.dismissNative(animated: false, completion: completion )
     }
@@ -284,8 +284,6 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
             
             super.init()
             
-            self.buildWebView()
-            
             self.controller?.updateContainerHeadColor(self.backgroundColor ?? .clear, self.headerColor ??  .clear, self.controller?.navigationBar?.backgroundNode.bgColor ?? .clear,  .immediate)
         }
         
@@ -306,15 +304,7 @@ internal final class WebAppController: ViewController, AttachmentContainable  {
             
             self.setupWebView()
             
-            guard let webView = self.webAppWebView else {
-                return
-            }
-            
-            self.view.addSubview(webView)
-            
-            webView.scrollView.insertSubview(self.topOverscrollNode.view, at: 0)
-            
-            self.controller?.webAppParameters.bridgeProvider?.onWebViewCreated(webView, parentVC: self.controller!.getVC()!)
+            self.buildWebView()
             
             NotificationCenter.default.addObserver(
                 self,
@@ -1001,13 +991,13 @@ internal extension WebAppController {
 }
 
 extension WebAppController : IMiniApp {
-    func reloadPage() {
-        if let webView = self.controllerNode.webAppWebView, webView.isExpired {
-            self.controllerNode.loadPage()
+    func reloadPage(_ forece: Bool) {
+        if let webView = self.controllerNode.webAppWebView, (webView.isExpired || forece) {
+            self.controllerNode.loadPage(forece)
             return
         }
         guard let _ = self.mUrl else {
-            self.controllerNode.loadPage()
+            self.controllerNode.loadPage(forece)
             return
         }
         if let webView = self.controllerNode.webAppWebView {
@@ -1015,9 +1005,9 @@ extension WebAppController : IMiniApp {
         }
     }
     
-    func requestDismiss(_ force: Bool) -> Bool {
+    func requestDismiss(_ force: Bool, _ clearCache: Bool) -> Bool {
         if force {
-            self.controllerNode.releaseRef()
+            self.controllerNode.releaseRef(clearCache)
             self.dismiss(animated: true)
             return true
         }
@@ -1027,7 +1017,7 @@ extension WebAppController : IMiniApp {
         } else {
             let needDismissConfirmation = self.controllerNode.needDismissConfirmation
             self.requestDismiss {
-                self.controllerNode.releaseRef()
+                self.controllerNode.releaseRef(clearCache)
                 self.dismiss(animated: true)
             }
             return !needDismissConfirmation
@@ -1355,6 +1345,13 @@ extension WebAppController.Node {
         if let hasSettings = self._webAppWebView?.hasSettings {
             self.controller?.hasSettings = hasSettings
         }
+        
+        if let webView = self._webAppWebView {
+            webView.miniApp = self.controller
+            self.view.addSubview(webView)
+            webView.scrollView.insertSubview(self.topOverscrollNode.view, at: 0)
+            self.controller?.webAppParameters.bridgeProvider?.onWebViewCreated(webView, parentVC: self.controller!.getVC()!)
+        }
     }
     
     func sendEvent(name: String, data: String?) {
@@ -1400,7 +1397,7 @@ extension WebAppController.Node {
         self.pageLodingNode.view.addSubview(loadingView)
     }
     
-    fileprivate func releaseRef() {
+    fileprivate func releaseRef(_ clearCache: Bool) {
         if let webView = self.webAppWebView {
             
             let data: JSON = ["is_visible" : false]
@@ -1409,11 +1406,17 @@ extension WebAppController.Node {
             self.controller?.webAppParameters.bridgeProvider?.onWebViewDestroy(webView)
             
             if let cacheKey = self.controller?.getCacheKey() {
-                webView.handleScriptMessage = nil
-                webView.handleSchemeMessage = nil
-                webView.handleDismiss = nil
-                webView.onFirstTouch = nil
-                WebAppLruCache.put(key: cacheKey, webView: webView)
+                if clearCache {
+                    webView.handleDismiss = nil
+                    WebAppLruCache.remove(key: cacheKey)
+                    
+                } else {
+                    webView.handleScriptMessage = nil
+                    webView.handleSchemeMessage = nil
+                    webView.handleDismiss = nil
+                    webView.onFirstTouch = nil
+                    WebAppLruCache.put(key: cacheKey, webView: webView)
+                }
             } else {
                 webView.handleDismiss = nil
             }
@@ -1508,7 +1511,7 @@ extension WebAppController.Node {
         
         self.setupWithOption()
         
-        self.loadPage()
+        self.loadPage(false)
     }
     
     func setPageFinish() {
@@ -1531,7 +1534,7 @@ extension WebAppController.Node {
         }
     }
     
-    fileprivate func loadPage() {
+    fileprivate func loadPage(_ forece: Bool) {
         guard let controller = self.controller else {
             return
         }
@@ -1543,7 +1546,7 @@ extension WebAppController.Node {
                 if let directUrl = await to110Request(url: url)?.url?.absoluteString, let webView =  self.webAppWebView {
                     DispatchQueue.main.async { [weak self] in
                         self?.pageLoadingView?.updateIconUrl(self?.controller?.webAppParameters.dAppDto?.iconUrl)
-                        self?.loadUrl(url: directUrl)
+                        self?.loadUrl(forece: forece, url: directUrl)
                     }
                 }
             }
@@ -1552,13 +1555,13 @@ extension WebAppController.Node {
             
             if let miniAppName =  self.controller?.webAppParameters.miniAppName, true == self.controller?.webAppParameters.isLocalSource {
                 self.controller?.isGetLaunchUrlSuccess = true
-                if let htmlURL = Bundle.main.url(forResource: miniAppName, withExtension: "html", subdirectory: ""), let webView =  self.webAppWebView {
+                if let htmlURL = Bundle.main.url(forResource: miniAppName, withExtension: "html", subdirectory: "") {
                     
                     let url = htmlURL.absoluteString + "#tgWebAppData=user%3D%257B%2522id%2522%253A6132055853%252C%2522first_name%2522%253A%2522billb%2522%252C%2522last_name%2522%253A%2522%2522%252C%2522username%2522%253A%2522billb008%2522%252C%2522language_code%2522%253A%2522zh-hans%2522%252C%2522allows_write_to_pm%2522%253Atrue%252C%2522photo_url%2522%253A%2522https%253A%255C%252F%255C%252Ft.me%255C%252Fi%255C%252Fuserpic%255C%252F320%255C%252F_ooPOu3U0aIepjoddkmjGdRrmxif7NVgrDl8Hu3MxK0FRU8w8HNdRPfzvuQDqU8k.svg%2522%257D%26chat_instance%3D6874471725191745609%26chat_type%3Dsender%26auth_date%3D1731772698%26hash%3D4b28282a3ca6bb84534560442d4550b9dd68954099447267aacc60c10a4920da&tgWebAppVersion=8.0&tgWebAppPlatform=android&tgWebAppThemeParams=%7B%22bg_color%22%3A%22%23ffffff%22%2C%22section_bg_color%22%3A%22%23ffffff%22%2C%22secondary_bg_color%22%3A%22%23f0f0f0%22%2C%22text_color%22%3A%22%23222222%22%2C%22hint_color%22%3A%22%23a8a8a8%22%2C%22link_color%22%3A%22%232678b6%22%2C%22button_color%22%3A%22%2350a8eb%22%2C%22button_text_color%22%3A%22%23ffffff%22%2C%22header_bg_color%22%3A%22%23527da3%22%2C%22accent_text_color%22%3A%22%231c93e3%22%2C%22section_header_text_color%22%3A%22%233a95d5%22%2C%22subtitle_text_color%22%3A%22%2382868a%22%2C%22destructive_text_color%22%3A%22%23cc2929%22%2C%22section_separator_color%22%3A%22%23d9d9d9%22%2C%22bottom_bar_bg_color%22%3A%22%23f0f0f0%22%7D"
   
                     self.controller?.mUrl = url
                     
-                    self.loadUrl(url: url)
+                    self.loadUrl(forece: forece, url: url)
                     
                 }
                 
@@ -1580,7 +1583,7 @@ extension WebAppController.Node {
                 weakSelf.controller?.webAppParameters.miniAppId = app?.id
                 weakSelf.controller?.webAppParameters.miniAppName = app?.identifier ?? ""
                 weakSelf.controller?.webAppParameters.botName = app?.botName
-                weakSelf.requestLaunchUrl()
+                weakSelf.requestLaunchUrl(forece)
                 DispatchQueue.main.async { [weak self] in
                     if let weakSelf = self {
                         weakSelf.controller?.updateActionBarTitle()
@@ -1652,7 +1655,7 @@ extension WebAppController.Node {
         callback(nil)
     }
     
-    fileprivate func requestLaunchUrl() {
+    fileprivate func requestLaunchUrl(_ forece: Bool) {
         
         guard let webAppParameters = self.controller?.webAppParameters, let appId = self.controller?.webAppParameters.miniAppId else {
             return
@@ -1667,49 +1670,56 @@ extension WebAppController.Node {
             let result = await OpenServiceRepository.shared.getLaunchInfo(params: LaunchParams(url: nil, appId: appId, languageCode: DefaultResourceProvider.shared.getLanguageCode(), startParams: webAppParameters.startParams, themeParams: generateWebAppThemeParams(resourceProvider: strongSelf.resourceProvider), peer: webAppParameters.peer, platform: "IOS"))
             
             DispatchQueue.main.async { [weak self] in
-                if let strongSelf = self, let webView = strongSelf.webAppWebView {
-                    switch result {
-                    case .success(let launchInfo):
-                        strongSelf.controller?.isGetLaunchUrlSuccess = true
-                        let url: String
-                        
-                        if let params = self?.controller?.webAppParameters.params {
-                            var components = URLComponents()
-                            components.queryItems = params.map({ key,value in
-                                URLQueryItem(name: key, value: value)
-                            })
-                
-                            if let queryStr = components.query, !queryStr.isEmpty {
-                                url = launchInfo.url + "&" + queryStr
-                            } else {
-                                url = launchInfo.url
-                            }
+                switch result {
+                case .success(let launchInfo):
+                    strongSelf.controller?.isGetLaunchUrlSuccess = true
+                    let url: String
+                    
+                    if let params = self?.controller?.webAppParameters.params {
+                        var components = URLComponents()
+                        components.queryItems = params.map({ key,value in
+                            URLQueryItem(name: key, value: value)
+                        })
+            
+                        if let queryStr = components.query, !queryStr.isEmpty {
+                            url = launchInfo.url + "&" + queryStr
                         } else {
                             url = launchInfo.url
                         }
-                        
-                        strongSelf.loadUrl(url: url)
-                        
-                    case .failure(let error):
-                        // Handle error
-                        strongSelf.controller?.isGetLaunchUrlSuccess = false
-                        MiniAppServiceImpl.instance.appDelegate.onApiError(error: error)
-                        switch(error) {
-                        case .requestFailed(let code, let message):
-                            if code == 460 {
-                                strongSelf.controller?.dismiss(animated: true)
-                            }
-                            strongSelf.controller?.webAppParameters.errorCallback(code, message)
-                        default:
-                            break
+                    } else {
+                        url = launchInfo.url
+                    }
+                    
+                    strongSelf.loadUrl(forece: forece, url: url)
+                    
+                case .failure(let error):
+                    // Handle error
+                    strongSelf.controller?.isGetLaunchUrlSuccess = false
+                    MiniAppServiceImpl.instance.appDelegate.onApiError(error: error)
+                    switch(error) {
+                    case .requestFailed(let code, let message):
+                        if code == 460 {
+                            strongSelf.controller?.dismiss(animated: true)
                         }
+                        strongSelf.controller?.webAppParameters.errorCallback(code, message)
+                    default:
+                        break
                     }
                 }
             }
         }
     }
     
-    func loadUrl(url: String) {
+    func loadUrl(forece: Bool, url: String) {
+        
+        if forece {
+            self.controller?.controllerNode.releaseRef(true)
+        }
+        
+        if self.webAppWebView == nil {
+            self.controller?.controllerNode.buildWebView()
+        }
+        
         if let webView = self.webAppWebView, let uri = URL(string: url) {
             if let cacheKey = self.controller?.getCacheKey() {
                 WebAppLruCache.put(key: cacheKey, webView: webView)
@@ -1740,7 +1750,7 @@ extension WebAppController.Node {
                         if let height = result as? CGFloat {
                             if height < 0.1 {
                                 DispatchQueue.main.async {
-                                    self.controller?.reloadPage()
+                                    self.controller?.reloadPage(false)
                                 }
                             }
                         }
@@ -3284,7 +3294,7 @@ extension WebAppController: UIViewControllerTransitioningDelegate {
     func onClickMenu(type: OW3MenuType) {
         switch type {
         case .RELOAD:
-            reloadPage()
+            reloadPage(false)
         case .SETTINGS:
             self.controllerNode.sendSettingsButtonEvent()
         case .FEEDBACK,.SHARE,.SHORTCUT:

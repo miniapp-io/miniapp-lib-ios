@@ -59,6 +59,8 @@ internal class BaseWebView: WKWebView {
     
     var customInsets: UIEdgeInsets = .zero
     
+    weak var miniApp: IMiniApp? = nil
+    
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let result = super.hitTest(point, with: event)
         self.lastTouchTimestamp = CACurrentMediaTime()
@@ -129,7 +131,7 @@ private let activeElementViewportRectJSON = """
 })()
 """
 
-fileprivate var bundleVersionStr: String = "1.0.35"
+fileprivate var bundleVersionStr: String = "1.0.36"
 
 internal extension WKWebView {
     

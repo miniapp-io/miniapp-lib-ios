@@ -171,7 +171,7 @@ internal class FloatingWindowManager {
     
     // Hide and destroy floating window
     func dismissFloatingWindow(force: Bool) {
-        if self.miniApp?.requestDismiss(force) ?? force {
+        if self.miniApp?.requestDismiss(force, false) ?? force {
             if let webView = self.webView, let frame = self.frameWebView {
                 webView.removeFromSuperview()
                 webView.transform = CGAffineTransform.identity
