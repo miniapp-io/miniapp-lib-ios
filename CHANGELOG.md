@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.37
+
+- Standalone mini-app opened from another mini-app is hosted in a separate transparent `UIWindow` (`windowLevel` above the host) so dismissing the launching app no longer tears down the nested app; teardown runs on `AttachmentController.didDismiss`, and the previous key window is restored.
+- `WindowHostView.eventView` for that flow uses the overlay window so keyboard and layout track the correct hierarchy; scene/key resolution aligns with `NativeWindowHostView`-style behavior.
+- Short fade-in when presenting standalone as a dialog (`isDialog`).
+
 ## 1.0.36
 
 - Add `getMiniAppByWebView` method to MiniAppService

@@ -15,6 +15,23 @@ private enum MiniAppModalWindow1RetainKey {
     static var key: UInt8 = 0
 }
 
+/// Standalone mini-app is shown in a separate `UIWindow` so dismissing the launching mini-app does not dismiss this overlay.
+private enum MiniAppStandaloneOverlayWindowKey {
+    static var key: UInt8 = 0
+}
+
+private enum MiniAppOverlayRestoreKeyWindowKey {
+    static var key: UInt8 = 0
+}
+
+private final class WeakUIWindowBox: NSObject {
+    weak var window: UIWindow?
+    init(_ window: UIWindow?) {
+        self.window = window
+        super.init()
+    }
+}
+
 open class WebAppLaunchParameters {
     func isDev() -> Bool {
         return false
@@ -1901,55 +1918,113 @@ internal final class MiniAppServiceImpl : MiniAppService {
         return nil
     }
     
-    func present(parentViewController: UIViewController, viewController: ViewController, isDialog: Bool) {
-        
-        
-        if let window = parentViewController.view.window {
-            
-            let fullView = UIView()
-            fullView.frame = CGRect(origin: CGPoint(), size: UIScreen.main.bounds.size)
-            
-            let hostView = WindowHostView(
-                containerView: fullView,
-                eventView: window,
-                isRotating: {
-                    return window.isRotating()
-                },
-                systemUserInterfaceStyle: .single(.light),
-                currentInterfaceOrientation: {
-                    return getCurrentViewInterfaceOrientation(view: window)
-                },
-                updateSupportedInterfaceOrientations: { _ in
-                },
-                updateDeferScreenEdgeGestures: { _ in
-                },
-                updatePrefersOnScreenNavigationHidden: { _ in
-                }
-            )
-            
-            let statusBarHost = ApplicationStatusBarHost()
-            let mainWindow = Window1(hostView: hostView, statusBarHost: statusBarHost)
-            mainWindow.standaloneModalLayoutTarget = viewController
-            
-            let rootNavitationController = UINavigationController(rootViewController: viewController)
-            
-            // Retain Window1 for the modal's lifetime so keyboard observers stay alive until dismiss.
-            objc_setAssociatedObject(
-                rootNavitationController,
-                &MiniAppModalWindow1RetainKey.key,
-                mainWindow,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-            )
-            
-            if isDialog {
-                rootNavitationController.modalPresentationStyle = .overCurrentContext
-                rootNavitationController.modalTransitionStyle = .crossDissolve
-            }
-            
-            parentViewController.present(rootNavitationController, animated: false, completion: {
-                viewController.containerLayoutUpdated(mainWindow.getContainedLayoutForWindowLayout(), transition: .immediate)
-            } )
+    /// Same approach as `NativeWindowHostView`: prefer the app key window for `WindowHostView.eventView` so keyboard and safe-area layout are not tied to a launching mini-app VC's view after it is deallocated or removed from the hierarchy.
+    private func keyWindowForStandaloneModal() -> UIWindow? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let active = scenes.filter { $0.activationState == .foregroundActive }
+        let ordered = active.isEmpty ? scenes : active
+        if let key = ordered.flatMap({ $0.windows }).first(where: { $0.isKeyWindow }) {
+            return key
         }
+        return ordered.flatMap({ $0.windows }).first { !$0.isHidden && $0.alpha > 0 }
+    }
+    
+    private func teardownStandaloneOverlayIfNeeded(for attachment: UIViewController) {
+        guard let overlay = objc_getAssociatedObject(attachment, &MiniAppStandaloneOverlayWindowKey.key) as? UIWindow else {
+            return
+        }
+        objc_setAssociatedObject(attachment, &MiniAppStandaloneOverlayWindowKey.key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        let restoreBox = objc_getAssociatedObject(overlay, &MiniAppOverlayRestoreKeyWindowKey.key) as? WeakUIWindowBox
+        objc_setAssociatedObject(overlay, &MiniAppOverlayRestoreKeyWindowKey.key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        overlay.isHidden = true
+        overlay.rootViewController = nil
+        if let w = restoreBox?.window, w.windowScene != nil, !w.isHidden {
+            w.makeKeyAndVisible()
+        }
+    }
+    
+    func present(parentViewController: UIViewController, viewController: ViewController, isDialog: Bool) {
+        let keyAppWindow = keyWindowForStandaloneModal() ?? parentViewController.view.window
+        guard let scene = keyAppWindow?.windowScene ?? parentViewController.view.window?.windowScene else {
+            return
+        }
+        
+        let overlayWindow = UIWindow(windowScene: scene)
+        overlayWindow.frame = CGRect(origin: .zero, size: UIScreen.main.bounds.size)
+        overlayWindow.windowLevel = .alert + 1
+        overlayWindow.backgroundColor = .clear
+        overlayWindow.isOpaque = false
+        
+        let fullView = UIView()
+        fullView.frame = CGRect(origin: CGPoint(), size: UIScreen.main.bounds.size)
+        
+        let hostView = WindowHostView(
+            containerView: fullView,
+            eventView: overlayWindow,
+            isRotating: {
+                return overlayWindow.isRotating()
+            },
+            systemUserInterfaceStyle: .single(.light),
+            currentInterfaceOrientation: {
+                return getCurrentViewInterfaceOrientation(view: overlayWindow)
+            },
+            updateSupportedInterfaceOrientations: { _ in
+            },
+            updateDeferScreenEdgeGestures: { _ in
+            },
+            updatePrefersOnScreenNavigationHidden: { _ in
+            }
+        )
+        
+        let statusBarHost = ApplicationStatusBarHost()
+        let mainWindow = Window1(hostView: hostView, statusBarHost: statusBarHost)
+        mainWindow.standaloneModalLayoutTarget = viewController
+        
+        let rootNavitationController = UINavigationController(rootViewController: viewController)
+        
+        // Retain Window1 for the modal's lifetime so keyboard observers stay alive until dismiss.
+        objc_setAssociatedObject(
+            rootNavitationController,
+            &MiniAppModalWindow1RetainKey.key,
+            mainWindow,
+            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+        )
+        
+        overlayWindow.rootViewController = rootNavitationController
+        
+        objc_setAssociatedObject(
+            viewController,
+            &MiniAppStandaloneOverlayWindowKey.key,
+            overlayWindow,
+            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+        )
+        let restoreKey = WeakUIWindowBox(keyAppWindow)
+        objc_setAssociatedObject(
+            overlayWindow,
+            &MiniAppOverlayRestoreKeyWindowKey.key,
+            restoreKey,
+            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+        )
+        
+        if let attachment = viewController as? AttachmentController {
+            let priorDidDismiss = attachment.didDismiss
+            attachment.didDismiss = { [weak attachment, weak self] in
+                priorDidDismiss()
+                guard let attachment, let self else {
+                    return
+                }
+                self.teardownStandaloneOverlayIfNeeded(for: attachment)
+            }
+        }
+        
+        overlayWindow.makeKeyAndVisible()
+        if isDialog {
+            overlayWindow.alpha = 0.0
+            UIView.animate(withDuration: 0.25) {
+                overlayWindow.alpha = 1.0
+            }
+        }
+        viewController.containerLayoutUpdated(mainWindow.getContainedLayoutForWindowLayout(), transition: .immediate)
     }
     
     override public func updateTheme(userInterfaceStyle: UIUserInterfaceStyle) {
