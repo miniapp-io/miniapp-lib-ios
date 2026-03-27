@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.38
+
+- Hide the standalone overlay `UIWindow` while the mini-app is in floating (corner) mode so touches reach the host; show it again on maximize.
+
 ## 1.0.37
 
 - Standalone mini-app opened from another mini-app is hosted in a separate transparent `UIWindow` (`windowLevel` above the host) so dismissing the launching app no longer tears down the nested app; teardown runs on `AttachmentController.didDismiss`, and the previous key window is restored.

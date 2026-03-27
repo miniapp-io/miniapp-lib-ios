@@ -1114,6 +1114,7 @@ extension WebAppController : IMiniApp {
         let height = MiniAppServiceImpl.instance.appConfig?.floatWindowHeight ?? 128.0
         
         FloatingWindowManager.shared.showFloatingWindow(miniApp: self, webView: self.controllerNode.webAppWebView, iconUrl: miniAppDto?.iconUrl, width: width, height: height)
+        MiniAppServiceImpl.instance.hideStandaloneOverlayWindowForFloatingMode(for: self)
         self.getVC()?.view.isHidden = true
         if let navigationController = self.getVC()?.navigationController {
             self.rootNV = navigationController
@@ -1135,6 +1136,7 @@ extension WebAppController : IMiniApp {
         if let backButtonView = self.floatingBackButton {
             self.view.bringSubviewToFront(backButtonView)
         }
+        MiniAppServiceImpl.instance.showStandaloneOverlayWindowAfterFloatingMode(for: self)
         self.getVC()?.view.isHidden = false
         
         if let vc = self.rootVC, let nv = self.rootNV {

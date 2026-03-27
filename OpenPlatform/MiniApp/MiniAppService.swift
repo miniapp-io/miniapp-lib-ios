@@ -1943,6 +1943,25 @@ internal final class MiniAppServiceImpl : MiniAppService {
         }
     }
     
+    /// Full-screen standalone `UIWindow` stays above the host and swallows touches; hide it while the mini-app is in floating mode so the host stays interactive.
+    internal func hideStandaloneOverlayWindowForFloatingMode(for miniApp: IMiniApp) {
+        guard let vc = miniApp.getVC(),
+              let overlay = objc_getAssociatedObject(vc, &MiniAppStandaloneOverlayWindowKey.key) as? UIWindow else {
+            return
+        }
+        overlay.isHidden = true
+    }
+    
+    internal func showStandaloneOverlayWindowAfterFloatingMode(for miniApp: IMiniApp) {
+        guard let vc = miniApp.getVC(),
+              let overlay = objc_getAssociatedObject(vc, &MiniAppStandaloneOverlayWindowKey.key) as? UIWindow else {
+            return
+        }
+        overlay.isHidden = false
+        overlay.alpha = 1.0
+        overlay.makeKeyAndVisible()
+    }
+    
     func present(parentViewController: UIViewController, viewController: ViewController, isDialog: Bool) {
         let keyAppWindow = keyWindowForStandaloneModal() ?? parentViewController.view.window
         guard let scene = keyAppWindow?.windowScene ?? parentViewController.view.window?.windowScene else {
