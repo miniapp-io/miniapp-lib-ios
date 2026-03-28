@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.39
+
+- Added automatic retry mechanism for non-success status codes (non-2xx responses)
+
 ## 1.0.38
 
 - Hide the standalone overlay `UIWindow` while the mini-app is in floating (corner) mode so touches reach the host; show it again on maximize.

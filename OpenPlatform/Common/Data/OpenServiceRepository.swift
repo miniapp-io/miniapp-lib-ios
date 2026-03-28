@@ -380,7 +380,15 @@ internal class OpenServiceRepository : OpenServiceDatasource {
                     }
                     
                     guard (200...299).contains(httpResponse.statusCode) else {
+                        
+                        // Retry
+                        if retryCount > 0 {
+                            return continuation.resume(returning:await sendRequest(request: request, withToken: withToken, retryCount: retryCount - 1))
+                        }
+                        
                         continuation.resume(returning: .failure(.requestFailed(statusCode: httpResponse.statusCode, message: httpResponse.description)))
+                        
+                        
                         return
                     }
                     
