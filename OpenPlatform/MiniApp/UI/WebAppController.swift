@@ -1348,11 +1348,11 @@ extension WebAppController.Node {
             self.controller?.hasSettings = hasSettings
         }
         
-        if let webView = self._webAppWebView {
+        if let webView = self._webAppWebView, let parentVC = self.controller?.getVC() {
             webView.miniApp = self.controller
             self.view.addSubview(webView)
             webView.scrollView.insertSubview(self.topOverscrollNode.view, at: 0)
-            self.controller?.webAppParameters.bridgeProvider?.onWebViewCreated(webView, parentVC: self.controller!.getVC()!)
+            self.controller?.webAppParameters.bridgeProvider?.onWebViewCreated(webView, parentVC: parentVC)
         }
     }
     

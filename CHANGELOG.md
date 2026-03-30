@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.40
+
+- Fixed 
+
+
 ## 1.0.39
 
 - Added automatic retry mechanism for non-success status codes (non-2xx responses)
