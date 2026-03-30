@@ -2,7 +2,7 @@
 
 ## 1.0.40
 
-- Fixed 
+- Fixed safely unwrap parentVC in webView creation block
 
 
 ## 1.0.39
