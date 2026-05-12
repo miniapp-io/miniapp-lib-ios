@@ -131,7 +131,7 @@ private let activeElementViewportRectJSON = """
 })()
 """
 
-fileprivate var bundleVersionStr: String = "1.0.40"
+fileprivate var bundleVersionStr: String = "1.0.41"
 
 internal extension WKWebView {
     

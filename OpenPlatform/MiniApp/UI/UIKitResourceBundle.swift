@@ -3,6 +3,9 @@ import UIKit
 
 public extension Bundle {
     static var uikitResource: Bundle {
+        #if SWIFT_PACKAGE
+        return .module
+        #else
         if let bundle = Bundle.main.url(forResource: "MiniAppXResources", withExtension: "bundle"),
            let resourceBundle = Bundle(url: bundle) {
             return resourceBundle
@@ -12,6 +15,7 @@ public extension Bundle {
             return resourceBundle
         }
         return Bundle.main
+        #endif
     }
 }
 

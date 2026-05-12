@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.41
+
+- Added Swift Package Manager support via `Package.swift` for `MiniAppX`.
+- Declared SPM dependency on `MiniAppUIKit` (`miniapp-lib-uikit`) while keeping CocoaPods compatibility in parallel.
+- Configured package metadata for iOS 13+ and localized resources (`defaultLocalization`), and included `MiniAppXResources.bundle` through SPM resources.
+- Updated resource loading logic in `UIKitResourceBundle` to use `Bundle.module` under SPM and preserve legacy fallback behavior for non-SPM integration.
+- Verified package manifest resolution/build graph with SwiftPM tooling to ensure the package can be consumed by the sample app.
+
 ## 1.0.40
 
 - Fixed safely unwrap parentVC in webView creation block
