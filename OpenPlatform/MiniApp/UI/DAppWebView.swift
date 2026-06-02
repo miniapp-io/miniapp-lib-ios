@@ -2,57 +2,6 @@ import Foundation
 import UIKit
 import WebKit
 
-private let selectionSource = "var css = '*{-webkit-touch-callout:none;} :not(input):not(textarea):not([\"contenteditable\"=\"true\"]){-webkit-user-select:none;}';"
-        + " var head = document.head || document.getElementsByTagName('head')[0];"
-        + " var style = document.createElement('style'); style.type = 'text/css';" +
-        " style.appendChild(document.createTextNode(css)); head.appendChild(style);"
-
-private let videoSource = """
-function disableWebkitEnterFullscreen(videoElement) {
-  if (videoElement && videoElement.webkitEnterFullscreen) {
-    Object.defineProperty(videoElement, 'webkitEnterFullscreen', {
-      value: undefined
-    });
-  }
-}
-
-function disableFullscreenOnExistingVideos() {
-  document.querySelectorAll('video').forEach(disableWebkitEnterFullscreen);
-}
-
-function handleMutations(mutations) {
-  mutations.forEach((mutation) => {
-    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
-      mutation.addedNodes.forEach((newNode) => {
-        if (newNode.tagName === 'VIDEO') {
-          disableWebkitEnterFullscreen(newNode);
-        }
-        if (newNode.querySelectorAll) {
-          newNode.querySelectorAll('video').forEach(disableWebkitEnterFullscreen);
-        }
-      });
-    }
-  });
-}
-
-disableFullscreenOnExistingVideos();
-
-const observer = new MutationObserver(handleMutations);
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.body) {
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-});
-
-function disconnectObserver() {
-  observer.disconnect();
-}
-"""
-
 internal final class DAppWebView: BaseWebView {
     
     init() {
@@ -68,16 +17,23 @@ internal final class DAppWebView: BaseWebView {
         preferences.javaScriptEnabled = true
         preferences.javaScriptCanOpenWindowsAutomatically = true
         preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        if #available(iOS 16.4, *) {
+            // iOS 18+/26 may regress requestFullscreen in WKWebView; prefer legacy video fullscreen path.
+            preferences.isElementFullscreenEnabled = false
+        }
         configuration.preferences = preferences
         
         let contentController = WKUserContentController()
         
         let selectionScript = WKUserScript(source: selectionSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
         contentController.addUserScript(selectionScript)
-        
-        let videoScript = WKUserScript(source: videoSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        contentController.addUserScript(videoScript)
-        
+
+        let fullscreenCompatScript = WKUserScript(source: fullscreenCompatSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        contentController.addUserScript(fullscreenCompatScript)
+
+        let iframeFullscreenCompatScript = WKUserScript(source: iframeFullscreenCompatSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        contentController.addUserScript(iframeFullscreenCompatScript)
+
         configuration.userContentController = contentController
         
         configuration.allowsInlineMediaPlayback = true
@@ -124,7 +80,7 @@ internal final class DAppWebView: BaseWebView {
         if #available(iOS 16.4, *) {
             self.isInspectable = true
         }
-        
+
         self.observeSomthings()
     }
     

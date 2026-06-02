@@ -227,9 +227,13 @@ internal struct VerifierParams: Codable {
 
 internal struct VerifierAppDto: Codable {
     let accessToken: String
+    let expiresAt: Int64?
+    let userId: String?
     
     private enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
+        case expiresAt = "expires_at"
+        case userId = "user_id"
     }
 }
 

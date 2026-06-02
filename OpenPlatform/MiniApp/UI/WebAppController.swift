@@ -646,7 +646,7 @@ internal extension WebAppController {
             return
         }
         
-        if self.webAppParameters.isDApp || self.isOpenDappOnMainFrame {
+        if false == self.getWebView()?.isWebAppReady || self.isOpenDappOnMainFrame {
             if self.isOpenDappOnMainFrame {
                 self.isOpenDappOnMainFrame = false
                 // self.controllerNode.setBackButtonVisible(false)
@@ -940,7 +940,7 @@ internal extension WebAppController {
     }
     
     func allowVerticalSwipe() -> Bool {
-        if self.webAppParameters.isDApp {
+        if true == self.webAppParameters.isDApp {
             return false
         }
         
@@ -954,8 +954,8 @@ internal extension WebAppController {
     }
     
     func allowHorizontalSwipe() -> Bool {
-        if self.webAppParameters.isDApp {
-            return true
+        if false == self.getWebView()?.isWebAppReady && true == self.getWebView()?.canGoBack {
+            return false
         }
         
         return !isBackButtonVisible() && (self.miniAppDto?.options?.allowHorizontalSwipe ?? true)
@@ -1310,10 +1310,8 @@ extension WebAppController.Node {
         }
         
         self.webAppWebView?.canGoBackObseve = { [weak self] canGoBack in
-            if false == self?.controller?.webAppParameters.isDApp {
-                if !canGoBack {
-                    self?.setBackButtonVisible(false)
-                }
+            if false == self?.controller?.getWebView()?.isWebAppReady {
+                self?.setBackButtonVisible(canGoBack)
                 return
             }
             self?.setBackButtonVisible(canGoBack)
@@ -1940,7 +1938,7 @@ extension WebAppController.Node {
                 webView.backButtonVisible = isVisible
             }
         }
-        if false == self.controller?.webAppParameters.isDApp {
+        if true == self.controller?.getWebView()?.isWebAppReady {
             if !isVisible && true == self.webAppWebView?.canGoBack {
                 self.webAppWebView?.allowsBackForwardNavigationGestures = false
             } else {
@@ -2494,8 +2492,6 @@ extension WebAppController.Node {
         
         Task {
             
-            self.controller?.webAppParameters.miniAppId = "10"
-            
             if let appId = self.controller?.webAppParameters.miniAppId {
                 
                 let (isDeal,result) = await MiniAppServiceImpl.instance.appDelegate.customMethodProvider(app, method, params)
@@ -2721,9 +2717,21 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
     }
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        self.updateBackButtonState(webView)
+        
         if let navigationDelegate =  self.getNavigationDelegateByProvider() {
             navigationDelegate.webView?(webView, didStartProvisionalNavigation: navigation)
             return
+        }
+    }
+    
+    private func updateBackButtonState(_ webView: WKWebView) {
+        if webView.canGoBack {
+            if false == self.controller?.getWebView()?.isWebAppReady || true == self.controller?.isOpenDappOnMainFrame {
+                self.setBackButtonVisible(true)
+            }
+        } else {
+            self.setBackButtonVisible(false)
         }
     }
     
@@ -2736,13 +2744,7 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
         
         self.pageLoadingView?.hide()
         
-        if webView.canGoBack {
-            if true == self.controller?.webAppParameters.isDApp || true == self.controller?.isOpenDappOnMainFrame {
-                self.setBackButtonVisible(true)
-            }
-        } else {
-            self.setBackButtonVisible(false)
-        }
+        self.updateBackButtonState(webView)
         
         if let navigationDelegate =  self.getNavigationDelegateByProvider() {
             navigationDelegate.webView?(webView, didFinish: navigation)
@@ -2858,6 +2860,7 @@ extension WebAppController.Node : WKNavigationDelegate, WKUIDelegate{
 extension WebAppController.Node {
     
     private func handleScriptMessage(_ message: WKScriptMessage) {
+        
         guard let controller = self.controller else {
             return
         }
@@ -2994,6 +2997,7 @@ extension WebAppController.Node {
                 }
             
             case "web_app_setup_back_button":
+                self.webAppWebView?.isWebAppReady = true
                 if let json = json, let isVisible = json["is_visible"] as? Bool {
                     self.setBackButtonVisible(isVisible)
                 }

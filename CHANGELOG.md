@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.43
+
+- Fixed video fullscreen not becoming visible in standalone mini-app mode by adjusting overlay window layering.
+- Updated standalone presentation to use host window bounds and set `overlayWindow.windowLevel` to `UIWindow.Level.normal + 1`, avoiding conflicts with system fullscreen video window.
+
+## 1.0.42
+
+- Added token expiration persistence and expiration check in session management
+- Auto-clears expired local auth data on startup
+
 ## 1.0.41
 
 - Added Swift Package Manager support via `Package.swift` for `MiniAppX`.

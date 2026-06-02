@@ -69,6 +69,22 @@ internal class OpenServiceRepository : OpenServiceDatasource {
         return OpenPlatformPluginImpl.getInstance().apiHost!
     }
     
+    private func isAuthRequest(_ request: URLRequest) -> Bool {
+        request.url?.pathComponents.contains("auth") == true
+    }
+    
+    /// Resolves bearer token for API calls: valid session token, or refresh when missing/expired (non-auth endpoints).
+    private func resolveAuthorizationToken(for request: URLRequest, withToken: Bool) async -> String? {
+        guard withToken else { return nil }
+        
+        if let token = await AuthManager.shared.getTokenSafely() {
+            return token
+        }
+        
+        guard !isAuthRequest(request) else { return nil }
+        return await AuthManager.shared.refreshToken()
+    }
+    
     func auth(verifier: String, idToken: String) async -> Result<VerifierAppDto, ApiError> {
         let path = PATH_AUTH
         
@@ -325,8 +341,7 @@ internal class OpenServiceRepository : OpenServiceDatasource {
                 do {
                     var modifiedRequest = request
                     
-                    // Add Authorization Header
-                    if withToken, let tokenData = SessionProvider.shared.token?.token, let token = String(data: tokenData, encoding: .utf8) {
+                    if let token = await resolveAuthorizationToken(for: request, withToken: withToken) {
                         modifiedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                     }
                     
@@ -373,7 +388,7 @@ internal class OpenServiceRepository : OpenServiceDatasource {
                     
                     // Check HTTP status code
                     if httpResponse.statusCode == 401 && withToken {
-                        SessionProvider.shared.token = nil
+                        await AuthManager.shared.clearToken()
                         if retryCount > 0, let _ = await AuthManager.shared.refreshToken() {
                             return continuation.resume(returning: await sendRequest(request: request, withToken: withToken, retryCount: retryCount - 1))
                         }

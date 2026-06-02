@@ -1923,10 +1923,24 @@ internal final class MiniAppServiceImpl : MiniAppService {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         let active = scenes.filter { $0.activationState == .foregroundActive }
         let ordered = active.isEmpty ? scenes : active
-        if let key = ordered.flatMap({ $0.windows }).first(where: { $0.isKeyWindow }) {
+        // Prefer normal-level app windows; avoid reusing overlay/alert-level windows as modal host.
+        if let key = ordered
+            .flatMap({ $0.windows })
+            .first(where: {
+                $0.isKeyWindow &&
+                !$0.isHidden &&
+                $0.alpha > 0 &&
+                $0.windowLevel.rawValue <= UIWindow.Level.normal.rawValue
+            }) {
             return key
         }
-        return ordered.flatMap({ $0.windows }).first { !$0.isHidden && $0.alpha > 0 }
+        return ordered
+            .flatMap({ $0.windows })
+            .first {
+                !$0.isHidden &&
+                $0.alpha > 0 &&
+                $0.windowLevel.rawValue <= UIWindow.Level.normal.rawValue
+            }
     }
     
     private func teardownStandaloneOverlayIfNeeded(for attachment: UIViewController) {
@@ -1963,19 +1977,23 @@ internal final class MiniAppServiceImpl : MiniAppService {
     }
     
     func present(parentViewController: UIViewController, viewController: ViewController, isDialog: Bool) {
-        let keyAppWindow = keyWindowForStandaloneModal() ?? parentViewController.view.window
-        guard let scene = keyAppWindow?.windowScene ?? parentViewController.view.window?.windowScene else {
+        // Always prefer the caller's window/scene to avoid attaching overlay to an unrelated key window.
+        let parentWindow = parentViewController.view.window
+        let keyAppWindow = parentWindow ?? keyWindowForStandaloneModal()
+        guard let scene = parentWindow?.windowScene ?? keyAppWindow?.windowScene else {
             return
         }
+        let hostBounds = keyAppWindow?.bounds ?? scene.coordinateSpace.bounds
         
         let overlayWindow = UIWindow(windowScene: scene)
-        overlayWindow.frame = CGRect(origin: .zero, size: UIScreen.main.bounds.size)
-        overlayWindow.windowLevel = .alert + 1
+        overlayWindow.frame = hostBounds
+        // Keep overlay above host app UI, but below system media fullscreen windows.
+        overlayWindow.windowLevel = UIWindow.Level.normal + 1
         overlayWindow.backgroundColor = .clear
         overlayWindow.isOpaque = false
         
         let fullView = UIView()
-        fullView.frame = CGRect(origin: CGPoint(), size: UIScreen.main.bounds.size)
+        fullView.frame = hostBounds
         
         let hostView = WindowHostView(
             containerView: fullView,

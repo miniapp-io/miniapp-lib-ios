@@ -7,6 +7,11 @@
 
 import Foundation
 
+fileprivate func saveAuthSession(accessToken: String, expiresAt: Int64?) {
+    let tokenData = Data(accessToken.utf8)
+    SessionProvider.shared.token = SessionState(token: tokenData, expiresAt: expiresAt)
+}
+
 internal actor AuthManager {
     static let shared = AuthManager()
     
@@ -80,8 +85,7 @@ internal actor AuthManager {
             
             switch result {
             case .success(let dto):
-                let tokenData = dto.accessToken.data(using: .utf8)!
-                SessionProvider.shared.token = SessionState(token: tokenData)
+                saveAuthSession(accessToken: dto.accessToken, expiresAt: dto.expiresAt)
                 
             case .failure(let apiErr):
                 switch apiErr {
@@ -133,8 +137,7 @@ internal actor AuthManager {
             
             switch result {
             case .success(let dto):
-                let tokenData = dto.accessToken.data(using: .utf8)!
-                SessionProvider.shared.token = SessionState(token: tokenData)
+                saveAuthSession(accessToken: dto.accessToken, expiresAt: dto.expiresAt)
                 return dto.accessToken
                 
             case .failure(let apiErr):
@@ -173,6 +176,14 @@ internal actor AuthManager {
             return nil
         }
         return token
+    }
+    
+    /// Returns a bearer token only when the session is valid and not expired (aligned with Android `getTokenSafely`).
+    func getTokenSafely() -> String? {
+        guard isAuth() else {
+            return nil
+        }
+        return getToken()
     }
     
     func clearToken() {

@@ -13,11 +13,17 @@ internal class SessionProvider {
     
     static let shared = SessionProvider()
     
+    private static let tokenExpireSkewSeconds: Int64 = 30
+    
     final let sessionKey = "$#_session"
+    
+    private var suppressPersist = false
     
     private var _token: SessionState? {
         didSet {
-            save()
+            if !suppressPersist {
+                save()
+            }
         }
     }
     
@@ -39,12 +45,36 @@ internal class SessionProvider {
     }
     
     func isAuth() -> Bool {
-        return _token?.token != nil && false == _token?.token.isEmpty
+        queue.sync {
+            guard let state = _token, !state.token.isEmpty else {
+                return false
+            }
+            return !isTokenExpirationTimeUnlocked()
+        }
+    }
+    
+    func isTokenExpirationTime() -> Bool {
+        queue.sync {
+            isTokenExpirationTimeUnlocked()
+        }
+    }
+    
+    private func isTokenExpirationTimeUnlocked() -> Bool {
+        let expiresAt = _token?.expiresAt ?? 0
+        let expiresAtSeconds = expiresAt > 9_999_999_999 ? expiresAt / 1000 : expiresAt
+        let nowSeconds = Int64(Date().timeIntervalSince1970)
+        return expiresAtSeconds <= nowSeconds + Self.tokenExpireSkewSeconds
     }
     
     private func load() {
         queue.sync {
+            suppressPersist = true
             _token = loadCodableData(forKey: sessionKey)
+            suppressPersist = false
+            
+            if isTokenExpirationTimeUnlocked() {
+                _token = nil
+            }
         }
     }
     
@@ -57,8 +87,10 @@ internal class SessionProvider {
 
 internal struct SessionState: Codable, Equatable {
     public var token: Data
+    public var expiresAt: Int64?
     
-    public init(token: Data) {
+    public init(token: Data, expiresAt: Int64? = nil) {
         self.token = token
+        self.expiresAt = expiresAt
     }
 }

@@ -3,6 +3,226 @@ import UIKit
 import WebKit
 import MiniAppUIKit
 
+internal let selectionSource = "var css = '*{-webkit-touch-callout:none;} :not(input):not(textarea):not([\"contenteditable\"=\"true\"]){-webkit-user-select:none;}';"
+        + " var head = document.head || document.getElementsByTagName('head')[0];"
+        + " var style = document.createElement('style'); style.type = 'text/css';" +
+        " style.appendChild(document.createTextNode(css)); head.appendChild(style);"
+
+internal let fullscreenCompatSource = """
+(function() {
+  if (window.__miniappxFullscreenCompatInstalled) {
+    return;
+  }
+  window.__miniappxFullscreenCompatInstalled = true;
+
+  function tryLegacyFullscreen(target) {
+    if (!target) return false;
+    if (typeof target.webkitEnterFullscreen === 'function') {
+      try { target.webkitEnterFullscreen(); return true; } catch (e) {}
+    }
+    if (typeof target.webkitEnterFullScreen === 'function') {
+      try { target.webkitEnterFullScreen(); return true; } catch (e) {}
+    }
+    if (target.querySelector) {
+      var childVideo = target.querySelector('video');
+      if (childVideo && typeof childVideo.webkitEnterFullscreen === 'function') {
+        try { childVideo.webkitEnterFullscreen(); return true; } catch (e) {}
+      }
+      if (childVideo && typeof childVideo.webkitEnterFullScreen === 'function') {
+        try { childVideo.webkitEnterFullScreen(); return true; } catch (e) {}
+      }
+    }
+    return false;
+  }
+
+  var elementProto = window.Element && window.Element.prototype;
+  if (elementProto) {
+    var rawElementRequestFullscreen = elementProto.requestFullscreen;
+    elementProto.requestFullscreen = function() {
+      var args = arguments;
+      try {
+        if (typeof rawElementRequestFullscreen === 'function') {
+          var result = rawElementRequestFullscreen.apply(this, args);
+          if (result && typeof result.catch === 'function') {
+            var self = this;
+            result.catch(function() { tryLegacyFullscreen(self); });
+          }
+          return result;
+        }
+      } catch (e) {}
+      if (tryLegacyFullscreen(this)) return Promise.resolve();
+      return undefined;
+    };
+
+    var rawWebkitRequestFullscreen = elementProto.webkitRequestFullscreen;
+    elementProto.webkitRequestFullscreen = function() {
+      try {
+        if (typeof rawWebkitRequestFullscreen === 'function') {
+          return rawWebkitRequestFullscreen.apply(this, arguments);
+        }
+      } catch (e) {}
+      if (tryLegacyFullscreen(this)) return Promise.resolve();
+      return undefined;
+    };
+
+    var rawWebkitRequestFullScreen = elementProto.webkitRequestFullScreen;
+    elementProto.webkitRequestFullScreen = function() {
+      try {
+        if (typeof rawWebkitRequestFullScreen === 'function') {
+          return rawWebkitRequestFullScreen.apply(this, arguments);
+        }
+      } catch (e) {}
+      if (tryLegacyFullscreen(this)) return Promise.resolve();
+      return undefined;
+    };
+  }
+
+  var videoProto = window.HTMLVideoElement && window.HTMLVideoElement.prototype;
+  if (videoProto) {
+    var rawVideoRequestFullscreen = videoProto.requestFullscreen;
+    videoProto.requestFullscreen = function() {
+      var args = arguments;
+      try {
+        if (typeof rawVideoRequestFullscreen === 'function') {
+          var result = rawVideoRequestFullscreen.apply(this, args);
+          if (result && typeof result.catch === 'function') {
+            var self = this;
+            result.catch(function() { tryLegacyFullscreen(self); });
+          }
+          return result;
+        }
+      } catch (e) {}
+      if (tryLegacyFullscreen(this)) return Promise.resolve();
+      return undefined;
+    };
+  }
+})();
+"""
+
+internal let iframeFullscreenCompatSource = """
+(function() {
+  if (window.__miniappxIframeFullscreenCompatInstalled) {
+    return;
+  }
+  window.__miniappxIframeFullscreenCompatInstalled = true;
+
+  function patchIframe(iframe) {
+    if (!iframe) return;
+    try {
+      iframe.allowFullscreen = true;
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('webkitallowfullscreen', '');
+
+      var allow = iframe.getAttribute('allow') || '';
+      if (!/\\bfullscreen\\b/i.test(allow)) {
+        allow = allow ? (allow + '; fullscreen *') : 'fullscreen *';
+      }
+      if (!/\\bautoplay\\b/i.test(allow)) {
+        allow = allow ? (allow + '; autoplay *') : 'autoplay *';
+      }
+      iframe.setAttribute('allow', allow);
+    } catch (e) {}
+  }
+
+  function patchAllIframes(root) {
+    try {
+      var scope = root || document;
+      if (scope.querySelectorAll) {
+        scope.querySelectorAll('iframe').forEach(patchIframe);
+      }
+    } catch (e) {}
+  }
+
+  patchAllIframes(document);
+
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (!mutation.addedNodes) return;
+      mutation.addedNodes.forEach(function(node) {
+        if (!node) return;
+        if (node.tagName === 'IFRAME') {
+          patchIframe(node);
+          return;
+        }
+        patchAllIframes(node);
+      });
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+    patchAllIframes(document);
+  });
+})();
+"""
+
+internal let fullscreenDebugSource = """
+(function() {
+  if (window.__miniappxFullscreenDebugInstalled) return;
+  window.__miniappxFullscreenDebugInstalled = true;
+
+  function post(type, payload) {
+    try {
+      var isTop = false;
+      try { isTop = (window.top === window); } catch (e) {}
+      window.webkit.messageHandlers.miniappxFullscreenDebug.postMessage({
+        type: type,
+        href: String(location.href || ''),
+        isTop: isTop,
+        payload: payload || {}
+      });
+    } catch (e) {}
+  }
+
+  function wrapCall(proto, name) {
+    if (!proto) return;
+    var raw = proto[name];
+    if (typeof raw !== 'function') return;
+    proto[name] = function() {
+      var tag = this && this.tagName ? String(this.tagName) : '';
+      post('call_' + name, { tag: tag });
+      try {
+        var result = raw.apply(this, arguments);
+        if (result && typeof result.then === 'function') {
+          result.then(function() { post('resolve_' + name, { tag: tag }); })
+            .catch(function(err) { post('reject_' + name, { tag: tag, error: String(err) }); });
+        }
+        return result;
+      } catch (err) {
+        post('throw_' + name, { tag: tag, error: String(err) });
+        throw err;
+      }
+    };
+  }
+
+  post('diag_boot', {
+    hasElementRequestFullscreen: !!(window.Element && Element.prototype && Element.prototype.requestFullscreen),
+    hasVideoRequestFullscreen: !!(window.HTMLVideoElement && HTMLVideoElement.prototype && HTMLVideoElement.prototype.requestFullscreen),
+    hasVideoWebkitEnterFullscreen: !!(window.HTMLVideoElement && HTMLVideoElement.prototype && HTMLVideoElement.prototype.webkitEnterFullscreen),
+    hasVideoWebkitEnterFullScreen: !!(window.HTMLVideoElement && HTMLVideoElement.prototype && HTMLVideoElement.prototype.webkitEnterFullScreen)
+  });
+
+  ['fullscreenchange', 'webkitfullscreenchange', 'webkitbeginfullscreen', 'webkitendfullscreen'].forEach(function(evt) {
+    document.addEventListener(evt, function(e) {
+      var t = e && e.target;
+      post('event_' + evt, {
+        tag: t && t.tagName ? String(t.tagName) : '',
+        className: t && t.className ? String(t.className) : ''
+      });
+    }, true);
+  });
+
+  wrapCall(window.Element && Element.prototype, 'requestFullscreen');
+  wrapCall(window.Element && Element.prototype, 'webkitRequestFullscreen');
+  wrapCall(window.Element && Element.prototype, 'webkitRequestFullScreen');
+  wrapCall(window.HTMLVideoElement && HTMLVideoElement.prototype, 'requestFullscreen');
+  wrapCall(window.HTMLVideoElement && HTMLVideoElement.prototype, 'webkitEnterFullscreen');
+  wrapCall(window.HTMLVideoElement && HTMLVideoElement.prototype, 'webkitEnterFullScreen');
+})();
+"""
+
 internal class BaseWebView: WKWebView {
     
     static var userAgentString: String? = nil
@@ -37,6 +257,8 @@ internal class BaseWebView: WKWebView {
     
     var expirationTimestamp: TimeInterval?
     
+    var isWebAppReady: Bool = false
+    
     var isExpired: Bool {
         guard let timestamp = expirationTimestamp else { return false }
         let currentTimestamp = Date().timeIntervalSince1970 * 1000.0
@@ -50,7 +272,7 @@ internal class BaseWebView: WKWebView {
     var handleScriptMessage: ((WKScriptMessage) -> Void)? = nil
     
     var handleSchemeMessage: ((WKScriptMessage) -> Void)? = nil
-    
+
     var lastTouchTimestamp: Double?
     
     var onFirstTouch: (() -> Void)? = {}
@@ -131,7 +353,7 @@ private let activeElementViewportRectJSON = """
 })()
 """
 
-fileprivate var bundleVersionStr: String = "1.0.41"
+fileprivate var bundleVersionStr: String = "1.0.42"
 
 internal extension WKWebView {
     
