@@ -1,9 +1,15 @@
 # Changelog
 
+## 1.0.44
+
+- Fixed standalone mini-app layout not resizing after runtime orientation changes (portrait ↔ landscape) when the page is already opened.
+- Added runtime relayout fallback in `AttachmentController` to re-apply `ContainerViewLayout` using current `windowScene` bounds and safe-area insets when geometry changes are detected.
+- Corrected `WebAppController` web view custom inset assignment (`right` now uses `layout.safeInsets.right`) to avoid asymmetric layout after rotation.
+
 ## 1.0.43
 
 - Fixed video fullscreen not becoming visible in standalone mini-app mode by adjusting overlay window layering.
-- Updated standalone presentation to use host window bounds and set `overlayWindow.windowLevel` to `UIWindow.Level.normal + 1`, avoiding conflicts with system fullscreen video window.
+- Updated standalone presentation to use host window bounds and set `overlayWindow.windowLevel` to `UIWindow.Level.normal, avoiding conflicts with system fullscreen video window.
 
 ## 1.0.42
 

@@ -216,6 +216,8 @@ internal class AttachmentController: ViewController {
     private let hasTextInput: Bool
     //private let makeEntityInputView: () -> AttachmentTextInputPanelInputView?
     public var animateAppearance: Bool = false
+    private var lastForcedLayoutSize: CGSize = .zero
+    private var lastForcedLayoutSafeInsets: UIEdgeInsets = .zero
     
     public var willDismiss: () -> Void = {}
     public var didDismiss: () -> Void = {}
@@ -230,6 +232,11 @@ internal class AttachmentController: ViewController {
         super.viewWillDisappear(animated)
         // 显示导航栏
         self.navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.forceRelayoutForCurrentBoundsIfNeeded()
     }
     
     public var mediaPickerContext: AttachmentMediaPickerContext? {
@@ -1328,6 +1335,66 @@ internal class AttachmentController: ViewController {
     }
     
     private var validLayout: ContainerViewLayout?
+
+    private func forceRelayoutForCurrentBoundsIfNeeded() {
+        guard let currentLayout = self.currentlyAppliedLayout else {
+            return
+        }
+
+        let viewSize = self.view.bounds.size
+        let sceneSize = self.view.window?.windowScene?.coordinateSpace.bounds.size
+        let targetSize = (sceneSize?.width ?? 0.0) > 0.0 && (sceneSize?.height ?? 0.0) > 0.0 ? sceneSize! : viewSize
+        guard targetSize.width > 0.0, targetSize.height > 0.0 else {
+            return
+        }
+
+        let safeInsetsSource = self.view.window?.safeAreaInsets ?? self.view.safeAreaInsets
+        let safeInsets = UIEdgeInsets(
+            top: safeInsetsSource.top,
+            left: safeInsetsSource.left,
+            bottom: safeInsetsSource.bottom,
+            right: safeInsetsSource.right
+        )
+
+        let sizeChanged =
+            abs(currentLayout.size.width - targetSize.width) > 0.5 ||
+            abs(currentLayout.size.height - targetSize.height) > 0.5
+        let safeInsetsChanged =
+            abs(currentLayout.safeInsets.top - safeInsets.top) > 0.5 ||
+            abs(currentLayout.safeInsets.left - safeInsets.left) > 0.5 ||
+            abs(currentLayout.safeInsets.bottom - safeInsets.bottom) > 0.5 ||
+            abs(currentLayout.safeInsets.right - safeInsets.right) > 0.5
+        guard sizeChanged || safeInsetsChanged else {
+            return
+        }
+
+        // Avoid relayout loops in the same geometry pass.
+        if abs(lastForcedLayoutSize.width - targetSize.width) <= 0.5 &&
+           abs(lastForcedLayoutSize.height - targetSize.height) <= 0.5 &&
+           abs(lastForcedLayoutSafeInsets.top - safeInsets.top) <= 0.5 &&
+           abs(lastForcedLayoutSafeInsets.left - safeInsets.left) <= 0.5 &&
+           abs(lastForcedLayoutSafeInsets.bottom - safeInsets.bottom) <= 0.5 &&
+           abs(lastForcedLayoutSafeInsets.right - safeInsets.right) <= 0.5 {
+            return
+        }
+        lastForcedLayoutSize = targetSize
+        lastForcedLayoutSafeInsets = safeInsets
+
+        let updatedLayout = ContainerViewLayout(
+            size: targetSize,
+            metrics: currentLayout.metrics,
+            deviceMetrics: currentLayout.deviceMetrics,
+            intrinsicInsets: currentLayout.intrinsicInsets,
+            safeInsets: safeInsets,
+            additionalInsets: currentLayout.additionalInsets,
+            statusBarHeight: currentLayout.statusBarHeight,
+            inputHeight: currentLayout.inputHeight,
+            inputHeightIsInteractivellyChanging: currentLayout.inputHeightIsInteractivellyChanging,
+            inVoiceOver: currentLayout.inVoiceOver
+        )
+
+        self.containerLayoutUpdated(updatedLayout, transition: .immediate)
+    }
     
     override public func containerLayoutUpdated(_ layout: ContainerViewLayout, transition: ContainedViewLayoutTransition) {
         let previousSize = self.validLayout?.size

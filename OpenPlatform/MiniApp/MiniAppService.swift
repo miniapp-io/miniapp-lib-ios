@@ -1988,7 +1988,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
         let overlayWindow = UIWindow(windowScene: scene)
         overlayWindow.frame = hostBounds
         // Keep overlay above host app UI, but below system media fullscreen windows.
-        overlayWindow.windowLevel = UIWindow.Level.normal + 1
+        overlayWindow.windowLevel = UIWindow.Level.normal
         overlayWindow.backgroundColor = .clear
         overlayWindow.isOpaque = false
         
