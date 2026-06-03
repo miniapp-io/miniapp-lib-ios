@@ -267,6 +267,43 @@ internal let fetchReadableStreamUploadCompatSource = """
     return typeof body.getReader === 'function';
   }
 
+  // Some clients (e.g. ky with onUploadProgress) fail before fetch():
+  // new Request(existingRequest, { duplex: 'half', body: ReadableStream(...) }).
+  // In WKWebView this throws "ReadableStream uploading is not supported".
+  // We patch Request to fall back to the original request body in that case.
+  if (typeof Request === 'function') {
+    var NativeRequest = Request;
+    var PatchedRequest = function(input, init) {
+      if (!(this instanceof PatchedRequest)) {
+        return new PatchedRequest(input, init);
+      }
+
+      var finalInit = init;
+      try {
+        if (finalInit && isReadableStreamBody(finalInit.body)) {
+          var inputIsRequest = (typeof NativeRequest === 'function') && (input instanceof NativeRequest);
+          if (inputIsRequest) {
+            var sanitized = {};
+            for (var k in finalInit) {
+              if (Object.prototype.hasOwnProperty.call(finalInit, k)) {
+                sanitized[k] = finalInit[k];
+              }
+            }
+            // Keep headers/method/etc, but drop unsupported stream upload fields.
+            try { delete sanitized.body; } catch (e) {}
+            try { delete sanitized.duplex; } catch (e) {}
+            finalInit = sanitized;
+          }
+        }
+      } catch (e) {}
+
+      return new NativeRequest(input, finalInit);
+    };
+    PatchedRequest.prototype = NativeRequest.prototype;
+    try { Object.setPrototypeOf(PatchedRequest, NativeRequest); } catch (e) {}
+    window.Request = PatchedRequest;
+  }
+
   function cloneInit(init) {
     if (!init) return {};
     var next = {};
