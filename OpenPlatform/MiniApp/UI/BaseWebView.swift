@@ -228,6 +228,9 @@ internal let fetchReadableStreamUploadCompatSource = """
   if (window.__miniappxFetchUploadCompatInstalled) {
     return;
   }
+
+  console.log('fetchReadableStreamUploadCompatSource');
+  
   window.__miniappxFetchUploadCompatInstalled = true;
 
   function supportsReadableStreamUpload() {
@@ -251,9 +254,10 @@ internal let fetchReadableStreamUploadCompatSource = """
     }
   }
 
-  if (supportsReadableStreamUpload()) {
-    return;
-  }
+  // NOTE:
+  // In WKWebView, capability probing via `new Request(...ReadableStream...)`
+  // can report "supported", but real network upload may still fail at runtime.
+  // So we intentionally DO NOT short-circuit on probe result here.
 
   if (typeof fetch !== 'function') {
     return;
@@ -296,12 +300,31 @@ internal let fetchReadableStreamUploadCompatSource = """
           }
         }
       } catch (e) {}
-
-      return new NativeRequest(input, finalInit);
+      try {
+        return new NativeRequest(input, finalInit);
+      } catch (e) {
+        // Last-resort fallback: strip stream/duplex and retry.
+        try {
+          var fallback = {};
+          if (finalInit) {
+            for (var key in finalInit) {
+              if (Object.prototype.hasOwnProperty.call(finalInit, key)) {
+                fallback[key] = finalInit[key];
+              }
+            }
+          }
+          try { delete fallback.body; } catch (_) {}
+          try { delete fallback.duplex; } catch (_) {}
+          return new NativeRequest(input, fallback);
+        } catch (_) {
+          throw e;
+        }
+      }
     };
     PatchedRequest.prototype = NativeRequest.prototype;
     try { Object.setPrototypeOf(PatchedRequest, NativeRequest); } catch (e) {}
     window.Request = PatchedRequest;
+    try { globalThis.Request = PatchedRequest; } catch (e) {}
   }
 
   function cloneInit(init) {
@@ -339,6 +362,7 @@ internal let fetchReadableStreamUploadCompatSource = """
       return rawFetch.call(window, input, nextInit);
     });
   };
+  try { globalThis.fetch = window.fetch; } catch (e) {}
 })();
 """
 
