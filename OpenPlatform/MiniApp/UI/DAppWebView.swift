@@ -28,6 +28,9 @@ internal final class DAppWebView: BaseWebView {
         let selectionScript = WKUserScript(source: selectionSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
         contentController.addUserScript(selectionScript)
 
+        let fetchReadableStreamUploadCompatScript = WKUserScript(source: fetchReadableStreamUploadCompatSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        contentController.addUserScript(fetchReadableStreamUploadCompatScript)
+
         let fullscreenCompatScript = WKUserScript(source: fullscreenCompatSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         contentController.addUserScript(fullscreenCompatScript)
 

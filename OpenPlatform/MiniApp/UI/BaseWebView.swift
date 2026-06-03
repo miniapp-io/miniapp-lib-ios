@@ -223,6 +223,88 @@ internal let fullscreenDebugSource = """
 })();
 """
 
+internal let fetchReadableStreamUploadCompatSource = """
+(function() {
+  if (window.__miniappxFetchUploadCompatInstalled) {
+    return;
+  }
+  window.__miniappxFetchUploadCompatInstalled = true;
+
+  function supportsReadableStreamUpload() {
+    try {
+      if (typeof ReadableStream !== 'function' || typeof Request !== 'function') {
+        return false;
+      }
+      var stream = new ReadableStream({
+        start: function(controller) {
+          controller.close();
+        }
+      });
+      var request = new Request('about:blank', {
+        method: 'POST',
+        body: stream,
+        duplex: 'half'
+      });
+      return !!request.body;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  if (supportsReadableStreamUpload()) {
+    return;
+  }
+
+  if (typeof fetch !== 'function') {
+    return;
+  }
+
+  function isReadableStreamBody(body) {
+    if (!body) return false;
+    if (typeof ReadableStream === 'function' && body instanceof ReadableStream) {
+      return true;
+    }
+    return typeof body.getReader === 'function';
+  }
+
+  function cloneInit(init) {
+    if (!init) return {};
+    var next = {};
+    for (var key in init) {
+      if (Object.prototype.hasOwnProperty.call(init, key)) {
+        next[key] = init[key];
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(next, 'duplex')) {
+      try {
+        delete next.duplex;
+      } catch (e) {}
+    }
+    return next;
+  }
+
+  var rawFetch = fetch;
+  window.fetch = function(input, init) {
+    var sourceInit = init || {};
+    var bodyFromInit = Object.prototype.hasOwnProperty.call(sourceInit, 'body') ? sourceInit.body : undefined;
+    var body = bodyFromInit;
+    if (body === undefined && typeof Request === 'function' && input instanceof Request) {
+      body = input.body;
+    }
+
+    if (!isReadableStreamBody(body)) {
+      return rawFetch.call(this, input, init);
+    }
+
+    var nextInit = cloneInit(sourceInit);
+    return Promise.resolve(new Response(body).blob()).then(function(blob) {
+      nextInit.body = blob;
+      return rawFetch.call(window, input, nextInit);
+    });
+  };
+})();
+"""
+
 internal class BaseWebView: WKWebView {
     
     static var userAgentString: String? = nil
