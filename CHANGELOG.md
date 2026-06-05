@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.45
+- Use onAppError instead of onApiError in AppDelegate
+
 ## 1.0.44
 
 - Fixed standalone mini-app layout not resizing after runtime orientation changes (portrait ↔ landscape) when the page is already opened.

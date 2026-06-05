@@ -423,7 +423,7 @@ internal class OpenServiceRepository : OpenServiceDatasource {
                     // Network error handling
                     continuation.resume(returning: .failure(.requestFailed(
                         statusCode: 404,
-                        message: (request.url?.absoluteString ?? "Unknown URL") + " *** " + error.localizedDescription
+                        message: error.localizedDescription
                     )))
                 }
             }

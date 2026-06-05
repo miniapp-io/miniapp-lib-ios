@@ -996,6 +996,16 @@ public protocol IAppDelegate {
     func onApiError(error: ApiError) -> Void
     
     /**
+     Share Mini App.
+     
+     - Parameters:
+     - app: Current MiniApp instance
+     - code: Error code.
+     - message: Error message.
+     */
+    func onAppError(app: IMiniApp?, error: ApiError) -> Void
+    
+    /**
      Window minimization
      
      - Parameters:
@@ -1395,12 +1405,12 @@ internal final class MiniAppServiceImpl : MiniAppService {
     
     override public func preload(config: WebAppLaunchParameters) {
         if !self.isSetupOK {
-            self.appDelegate.onApiError(error: .waitForSetup)
+            self.onAppError(app: nil, error: .waitForSetup)
             return
         }
         
         guard let config = config as? WebAppPreloadParameters else {
-            self.appDelegate.onApiError(error: .invalidData)
+            self.onAppError(app: nil, error: .invalidData)
             return
         }
         
@@ -1487,7 +1497,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
     private func _launch(config: WebAppLaunchParameters)  -> IMiniApp? {
         
         if !self.isSetupOK {
-            self.appDelegate.onApiError(error: .waitForSetup)
+            self.onAppError(app: nil, error: .waitForSetup)
             return nil
         }
         
@@ -1612,7 +1622,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                                               willDismiss: config.willDismiss,
                                                               didDismiss: config.didDismiss)
                         case .failure(let error):
-                            weakSelf.appDelegate.onApiError(error: error)
+                            weakSelf.onAppError(app: nil, error: error)
                             switch(error) {
                             case .requestFailed(let code, let message):
                                 config.errorCallback(code, message)
@@ -1754,7 +1764,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                 
                             }
                         case .failure(let error):
-                            weakSelf.appDelegate.onApiError(error: error)
+                            weakSelf.onAppError(app: nil, error: error)
                             switch(error) {
                             case .requestFailed(let code, let message):
                                 errorCallback(code, message)
@@ -1807,7 +1817,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                 
                             }
                         case .failure(let error):
-                            weakSelf.appDelegate.onApiError(error: error)
+                            weakSelf.onAppError(app: nil, error: error)
                             switch(error) {
                             case .requestFailed(let code, let message):
                                 errorCallback(code, message)
@@ -1862,7 +1872,7 @@ internal final class MiniAppServiceImpl : MiniAppService {
                                 
                             }
                         case .failure(let error):
-                            weakSelf.appDelegate.onApiError(error: error)
+                            weakSelf.onAppError(app: nil, error: error)
                             switch(error) {
                             case .requestFailed(let code, let message):
                                 errorCallback(code, message)
@@ -1976,7 +1986,11 @@ internal final class MiniAppServiceImpl : MiniAppService {
         overlay.makeKeyAndVisible()
     }
     
-    func present(parentViewController: UIViewController, viewController: ViewController, isDialog: Bool) {
+    internal func onAppError(app: IMiniApp?, error: ApiError) {
+        MiniAppServiceImpl.instance.appDelegate.onAppError(app: app, error: error)
+    }
+    
+    internal func present(parentViewController: UIViewController, viewController: ViewController, isDialog: Bool) {
         // Always prefer the caller's window/scene to avoid attaching overlay to an unrelated key window.
         let parentWindow = parentViewController.view.window
         let keyAppWindow = parentWindow ?? keyWindowForStandaloneModal()

@@ -1480,7 +1480,7 @@ extension WebAppController.Node {
                 }
             case .failure(let error):
                 //callback(nil)
-                MiniAppServiceImpl.instance.appDelegate.onApiError(error: error)
+                MiniAppServiceImpl.instance.onAppError(app:  self.controller, error: error)
                 switch(error) {
                 case .requestFailed(let code, let message):
                     if code == 460 {
@@ -1615,7 +1615,7 @@ extension WebAppController.Node {
                     callback(app)
                 case .failure(let error):
                     //callback(nil)
-                    MiniAppServiceImpl.instance.appDelegate.onApiError(error: error)
+                    MiniAppServiceImpl.instance.onAppError(app:  self?.controller, error: error)
                     switch(error) {
                     case .requestFailed(let code, let message):
                         if code == 460 {
@@ -1641,7 +1641,7 @@ extension WebAppController.Node {
                     callback(app)
                 case .failure(let error):
                     //callback(nil)
-                    MiniAppServiceImpl.instance.appDelegate.onApiError(error: error)
+                    MiniAppServiceImpl.instance.onAppError(app:  self?.controller, error: error)
                     switch(error) {
                     case .requestFailed(let code, let message):
                         await self?.controller?.webAppParameters.errorCallback(code, message)
@@ -1697,7 +1697,7 @@ extension WebAppController.Node {
                 case .failure(let error):
                     // Handle error
                     strongSelf.controller?.isGetLaunchUrlSuccess = false
-                    MiniAppServiceImpl.instance.appDelegate.onApiError(error: error)
+                    MiniAppServiceImpl.instance.onAppError(app:  self?.controller, error: error)
                     switch(error) {
                     case .requestFailed(let code, let message):
                         if code == 460 {
