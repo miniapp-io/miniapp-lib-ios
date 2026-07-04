@@ -1008,7 +1008,9 @@ extension WebAppController : IMiniApp {
     func requestDismiss(_ force: Bool, _ clearCache: Bool) -> Bool {
         if force {
             self.controllerNode.releaseRef(clearCache)
-            self.dismiss(animated: true)
+            // Force dismiss must be synchronous so overlay teardown (and key-window restore)
+            // completes before a replacement mini-app is presented on a new overlay window.
+            self.dismiss(animated: false)
             return true
         }
         if case .back = self.cancelButtonNode.state {

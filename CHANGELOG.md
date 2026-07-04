@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.46
+- Fixed Force dismiss must be synchronous so overlay teardown (and key-window restore)
+
 ## 1.0.45
 - Use onAppError instead of onApiError in AppDelegate
 
